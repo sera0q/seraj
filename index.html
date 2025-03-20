@@ -5,56 +5,77 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Cambright Placement Test</title>
     <style>
-        body { font-family: Arial, sans-serif; text-align: center; }
-        #welcome { margin: 50px; }
-        #timer { font-size: 24px; font-weight: bold; color: green; }
-        iframe { width: 100%; height: 600px; border: none; }
-        .hidden { display: none; }
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+        }
+        .container {
+            margin-top: 50px;
+        }
+        #timer {
+            font-size: 20px;
+            font-weight: bold;
+            color: green;
+        }
     </style>
     <script>
-        let timeLeft = 50 * 60;
+        let timeLeft = 50 * 60; // 50 minutes in seconds
+        let timerInterval;
+
         function startTest() {
-            document.getElementById('welcome').classList.add('hidden');
-            document.getElementById('exam').classList.remove('hidden');
-            countdown();
+            document.getElementById("welcome").style.display = "none";
+            document.getElementById("exam").style.display = "block";
+            startTimer();
         }
-        function countdown() {
-            let timerInterval = setInterval(() => {
+
+        function startTimer() {
+            timerInterval = setInterval(function () {
                 let minutes = Math.floor(timeLeft / 60);
                 let seconds = timeLeft % 60;
-                document.getElementById('timer').innerText = `${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
-                if (timeLeft <= 600) { document.getElementById('timer').style.color = 'red'; }
+                document.getElementById("timer").innerText = `${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
+                
+                if (timeLeft <= 600) {
+                    document.getElementById("timer").style.color = "red";
+                }
+                
                 if (timeLeft <= 0) {
                     clearInterval(timerInterval);
-                    alert('Time is up! Submitting now.');
-                    document.getElementById('examFrame').contentWindow.document.querySelector("form").submit();
+                    document.getElementById("examForm").submit();
                 }
                 timeLeft--;
             }, 1000);
         }
-        document.addEventListener('keydown', (event) => {
-            if (event.ctrlKey || event.shiftKey || event.key === 'PrintScreen') {
+        
+        // Block certain keys and actions
+        document.addEventListener("keydown", function (event) {
+            if (event.ctrlKey || event.shiftKey || event.key === "F12") {
                 event.preventDefault();
-                alert('Action blocked!');
+                alert("This action is disabled during the test.");
             }
         });
-        document.addEventListener('visibilitychange', () => {
-            if (document.hidden) alert('Warning: Do not leave the test window!');
+
+        document.addEventListener("contextmenu", function (event) {
+            event.preventDefault();
+            alert("Right-click is disabled during the test.");
+        });
+
+        document.addEventListener("visibilitychange", function () {
+            if (document.hidden) {
+                alert("Warning: You left the test window!");
+            }
         });
     </script>
 </head>
 <body>
-    <div id="welcome">
-        <h2>Welcome to the Cambright Placement Test</h2>
-        <p>Our English Placement Test is designed to assess your current proficiency level and help us recommend the most suitable learning program for you.</p>
+    <div id="welcome" class="container">
         <img src="Cambright.Lan.png" alt="Cambright Logo" width="300">
-        <br><br>
+        <h2>Our English Placement Test is designed to assess your current proficiency level and help us recommend the most suitable learning program for you.</h2>
         <button onclick="startTest()">Start Test</button>
     </div>
-    <div id="exam" class="hidden">
-        <h2>Placement Test</h2>
-        <p id="timer">50:00</p>
-        <iframe id="examFrame" src="https://docs.google.com/forms/d/e/1FAIpQLSfpBaiBgM_dhm93cIwG9kWKZFSx7E8XM2UxRkb3GOo939GRjA/viewform?usp=header"></iframe>
+
+    <div id="exam" class="container" style="display: none;">
+        <p>Time Left: <span id="timer">50:00</span></p>
+        <iframe id="examForm" src="https://docs.google.com/forms/d/e/1FAIpQLSfpBaiBgM_dhm93cIwG9kWKZFSx7E8XM2UxRkb3GOo939GRjA/viewform?embedded=true" width="640" height="800"></iframe>
     </div>
 </body>
 </html>
