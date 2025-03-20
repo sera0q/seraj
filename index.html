@@ -59,12 +59,12 @@
 
     <div class="container" id="examPage" style="display:none;">
         <h2>Placement Test</h2>
-        <p>Time Remaining: <span id="timer">10:00</span></p>
+        <p>Time Remaining: <span id="timer">50:00</span></p>
         <iframe id="examFrame" src="https://docs.google.com/forms/d/e/1FAIpQLSfpBaiBgM_dhm93cIwG9kWKZFSx7E8XM2UxRkb3GOo939GRjA/viewform?usp=header"></iframe>
     </div>
 
     <script>
-        let timeLeft = 600; // 10 minutes
+        let timeLeft = 3000; // 50 minutes in seconds
         let warningIssued = false;
         let isAlertOpen = false; // Track if an alert is currently open
 
@@ -82,12 +82,18 @@
                 let seconds = timeLeft % 60;
                 timerElement.innerHTML = `${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
                 
-                if (timeLeft <= 300 && !warningIssued) {
+                // Change color to red when 10 minutes are left
+                if (timeLeft <= 600 && !warningIssued) {
                     timerElement.style.color = "red";
-                    alert("Warning: Only 5 minutes remaining!");
+                    if (!isAlertOpen) {
+                        isAlertOpen = true;
+                        alert("Warning: Only 10 minutes remaining!");
+                        isAlertOpen = false;
+                    }
                     warningIssued = true;
                 }
 
+                // Submit the exam when time is up
                 if (timeLeft <= 0) {
                     clearInterval(countdown);
                     alert("Time is up! Submitting your exam.");
@@ -115,23 +121,6 @@
                 isAlertOpen = true;
                 alert("Right-click is disabled!");
                 isAlertOpen = false;
-            }
-        });
-
-        // Prevent leaving the page
-        window.addEventListener("blur", function () {
-            if (!isAlertOpen && document.getElementById("examPage").style.display === "block") {
-                isAlertOpen = true;
-                alert("Warning: Do not leave this page! Your exam will be submitted if you leave.");
-                isAlertOpen = false;
-                window.focus(); // Bring the page back into focus
-            }
-        });
-
-        window.addEventListener("beforeunload", function (event) {
-            if (document.getElementById("examPage").style.display === "block") {
-                event.preventDefault();
-                event.returnValue = "Are you sure you want to leave? Your exam will be submitted.";
             }
         });
     </script>
