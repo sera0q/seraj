@@ -8,78 +8,91 @@
         body {
             font-family: Arial, sans-serif;
             text-align: center;
+            background-color: #f4f4f4;
         }
-        .hidden {
-            display: none;
+        .container {
+            width: 80%;
+            margin: auto;
+            padding: 20px;
+            background: white;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
         }
-        .timer {
+        #timer {
             font-size: 24px;
-            font-weight: bold;
             color: green;
         }
-        .start-btn {
+        #examFrame {
+            width: 100%;
+            height: 600px;
+            border: none;
+            display: none;
+        }
+        #startBtn {
             padding: 10px 20px;
             font-size: 18px;
-            cursor: pointer;
             background-color: blue;
             color: white;
             border: none;
-            border-radius: 5px;
+            cursor: pointer;
         }
     </style>
+</head>
+<body>
+    <div class="container" id="welcomePage">
+        <img src="Cambright.Lan.png" alt="Cambright Logo" width="200">
+        <h1>Welcome to the Cambright Placement Test</h1>
+        <p>Our English Placement Test is designed to assess your current proficiency level and help us recommend the most suitable learning program for you.</p>
+        <button id="startBtn" onclick="startExam()">Start Exam</button>
+    </div>
+
+    <div class="container" id="examPage" style="display:none;">
+        <h2>Placement Test</h2>
+        <p>Time Remaining: <span id="timer">50:00</span></p>
+        <iframe id="examFrame" src="https://docs.google.com/forms/d/e/1FAIpQLSfpBaiBgM_dhm93cIwG9kWKZFSx7E8XM2UxRkb3GOo939GRjA/viewform?usp=header"></iframe>
+    </div>
+
     <script>
-        let timeLeft = 50 * 60;
-        let shiftBlocked = false;
+        let timeLeft = 3000;
+        let warningIssued = false;
 
         function startExam() {
-            document.getElementById('welcome-screen').classList.add('hidden');
-            document.getElementById('exam-content').classList.remove('hidden');
+            document.getElementById("welcomePage").style.display = "none";
+            document.getElementById("examPage").style.display = "block";
+            document.getElementById("examFrame").style.display = "block";
             startTimer();
         }
 
         function startTimer() {
-            const timerElement = document.getElementById('timer');
-            setInterval(() => {
-                if (timeLeft <= 0) {
-                    alert("Time's up! Your test has been submitted.");
-                    document.getElementById('exam-form').submit();
-                }
+            let timerElement = document.getElementById("timer");
+            let countdown = setInterval(function () {
                 let minutes = Math.floor(timeLeft / 60);
                 let seconds = timeLeft % 60;
-                timerElement.textContent = `${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
+                timerElement.innerHTML = `${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
+                
                 if (timeLeft <= 600) {
-                    timerElement.style.color = 'red';
+                    timerElement.style.color = "red";
+                }
+
+                if (timeLeft <= 0) {
+                    clearInterval(countdown);
+                    alert("Time is up! Submitting your exam.");
+                    document.getElementById("examFrame").submit();
                 }
                 timeLeft--;
             }, 1000);
         }
 
-        document.addEventListener('keydown', function(event) {
-            if (event.key === "Shift" || event.ctrlKey || event.key === "Meta") {
-                if (!shiftBlocked) {
-                    shiftBlocked = true;
-                    alert("Warning: Shift, Ctrl, and Meta keys are disabled during the exam.");
-                    setTimeout(() => {
-                        shiftBlocked = false;
-                    }, 1000);
-                }
+        document.addEventListener("keydown", function (event) {
+            if (event.key === "Shift" || event.ctrlKey) {
                 event.preventDefault();
+                alert("Shift, Ctrl, and Right-Click are blocked!");
             }
         });
-    </script>
-</head>
-<body>
-    <div id="welcome-screen">
-        <img src="Cambright.Lan.png" alt="Cambright Logo" width="200">
-        <h2>Welcome to the Cambright Placement Test</h2>
-        <p>Our English Placement Test is designed to assess your current proficiency level and help us recommend the most suitable learning program for you.</p>
-        <button class="start-btn" onclick="startExam()">Start Exam</button>
-    </div>
 
-    <div id="exam-content" class="hidden">
-        <h2>Placement Test</h2>
-        <p class="timer" id="timer">50:00</p>
-        <iframe src="https://docs.google.com/forms/d/e/1FAIpQLSfpBaiBgM_dhm93cIwG9kWKZFSx7E8XM2UxRkb3GOo939GRjA/viewform?embedded=true" width="640" height="800" frameborder="0" marginheight="0" marginwidth="0">Loading…</iframe>
-    </div>
+        document.addEventListener("contextmenu", function (event) {
+            event.preventDefault();
+            alert("Right-click is disabled!");
+        });
+    </script>
 </body>
 </html>
