@@ -31,17 +31,6 @@
             height: 600px;
             border: none;
             display: none;
-            position: relative;
-        }
-        #overlay {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: transparent;
-            z-index: 9999;
-            display: none;
         }
         #startBtn {
             padding: 10px 20px;
@@ -63,7 +52,6 @@
 </head>
 <body>
     <div class="container" id="welcomePage">
-        <img src="Cambright.Lan.png" alt="Cambright Logo" width="200">
         <h1>Welcome to the Cambright Placement Test</h1>
         <p>Our English Placement Test is designed to assess your current proficiency level and help us recommend the most suitable learning program for you.</p>
         <button id="startBtn" onclick="startExam()">Start Exam</button>
@@ -72,7 +60,6 @@
     <div class="container" id="examPage" style="display:none;">
         <h2>Placement Test</h2>
         <p>Time Remaining: <span id="timer">50:00</span></p>
-        <div id="overlay"></div>
         <iframe id="examFrame" src="https://docs.google.com/forms/d/e/1FAIpQLSfpBaiBgM_dhm93cIwG9kWKZFSx7E8XM2UxRkb3GOo939GRjA/viewform?usp=header"></iframe>
     </div>
 
@@ -85,7 +72,6 @@
             document.getElementById("welcomePage").style.display = "none";
             document.getElementById("examPage").style.display = "block";
             document.getElementById("examFrame").style.display = "block";
-            document.getElementById("overlay").style.display = "block";
             startTimer();
         }
 
@@ -96,7 +82,6 @@
                 let seconds = timeLeft % 60;
                 timerElement.innerHTML = `${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
                 
-                // Change color to red when 10 minutes are left
                 if (timeLeft <= 600 && !warningIssued) {
                     timerElement.style.color = "red";
                     if (!isAlertOpen) {
@@ -107,7 +92,6 @@
                     warningIssued = true;
                 }
 
-                // Notify user when time is up
                 if (timeLeft <= 0) {
                     clearInterval(countdown);
                     alert("Time is up! Submitting your exam.");
@@ -116,50 +100,6 @@
                 timeLeft--;
             }, 1000);
         }
-
-        // Block right-click, copy-paste, and long-press on the overlay
-        const overlay = document.getElementById("overlay");
-
-        overlay.addEventListener("contextmenu", function (event) {
-            event.preventDefault();
-            alert("Right-click is disabled!");
-        });
-
-        overlay.addEventListener("copy", function (event) {
-            event.preventDefault();
-            alert("Copying is disabled!");
-        });
-
-        overlay.addEventListener("cut", function (event) {
-            event.preventDefault();
-            alert("Cutting is disabled!");
-        });
-
-        overlay.addEventListener("paste", function (event) {
-            event.preventDefault();
-            alert("Pasting is disabled!");
-        });
-
-        // Allow normal clicks and touches
-        overlay.addEventListener("click", function (event) {
-            // Allow normal clicks
-        });
-
-        overlay.addEventListener("touchstart", function (event) {
-            // Allow normal touch interactions
-        }, { passive: true });
-
-        // Block Shift, Ctrl, and Right-Click on the entire page
-        document.addEventListener("keydown", function (event) {
-            if (event.key === "Shift" || event.ctrlKey || event.metaKey) {
-                event.preventDefault();
-                if (!isAlertOpen) {
-                    isAlertOpen = true;
-                    alert("Shift, Ctrl, and Right-Click are blocked!");
-                    isAlertOpen = false;
-                }
-            }
-        });
     </script>
 </body>
 </html>
