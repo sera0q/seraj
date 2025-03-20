@@ -19,6 +19,7 @@
             background: white;
             box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
             border-radius: 10px;
+            position: relative;
         }
         #timer {
             font-size: 24px;
@@ -29,6 +30,17 @@
             width: 100%;
             height: 600px;
             border: none;
+            display: none;
+            position: relative;
+        }
+        #overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: transparent;
+            z-index: 9999;
             display: none;
         }
         #startBtn {
@@ -60,11 +72,12 @@
     <div class="container" id="examPage" style="display:none;">
         <h2>Placement Test</h2>
         <p>Time Remaining: <span id="timer">50:00</span></p>
+        <div id="overlay"></div>
         <iframe id="examFrame" src="https://docs.google.com/forms/d/e/1FAIpQLSfpBaiBgM_dhm93cIwG9kWKZFSx7E8XM2UxRkb3GOo939GRjA/viewform?usp=header"></iframe>
     </div>
 
     <script>
-        let timeLeft = 30; // 50 minutes in seconds
+        let timeLeft = 3000; // 50 minutes in seconds
         let warningIssued = false;
         let isAlertOpen = false; // Track if an alert is currently open
 
@@ -72,6 +85,7 @@
             document.getElementById("welcomePage").style.display = "none";
             document.getElementById("examPage").style.display = "block";
             document.getElementById("examFrame").style.display = "block";
+            document.getElementById("overlay").style.display = "block";
             startTimer();
         }
 
@@ -93,7 +107,7 @@
                     warningIssued = true;
                 }
 
-                // Submit the exam when time is up
+                // Notify user when time is up
                 if (timeLeft <= 0) {
                     clearInterval(countdown);
                     alert("Time is up! Submitting your exam.");
@@ -103,7 +117,39 @@
             }, 1000);
         }
 
-        // Block Shift, Ctrl, and Right-Click
+        // Block right-click, copy-paste, and long-press on the overlay
+        const overlay = document.getElementById("overlay");
+
+        overlay.addEventListener("contextmenu", function (event) {
+            event.preventDefault();
+            alert("Right-click is disabled!");
+        });
+
+        overlay.addEventListener("copy", function (event) {
+            event.preventDefault();
+            alert("Copying is disabled!");
+        });
+
+        overlay.addEventListener("cut", function (event) {
+            event.preventDefault();
+            alert("Cutting is disabled!");
+        });
+
+        overlay.addEventListener("paste", function (event) {
+            event.preventDefault();
+            alert("Pasting is disabled!");
+        });
+
+        // Allow normal clicks and touches
+        overlay.addEventListener("click", function (event) {
+            // Allow normal clicks
+        });
+
+        overlay.addEventListener("touchstart", function (event) {
+            // Allow normal touch interactions
+        }, { passive: true });
+
+        // Block Shift, Ctrl, and Right-Click on the entire page
         document.addEventListener("keydown", function (event) {
             if (event.key === "Shift" || event.ctrlKey || event.metaKey) {
                 event.preventDefault();
@@ -112,15 +158,6 @@
                     alert("Shift, Ctrl, and Right-Click are blocked!");
                     isAlertOpen = false;
                 }
-            }
-        });
-
-        document.addEventListener("contextmenu", function (event) {
-            event.preventDefault();
-            if (!isAlertOpen) {
-                isAlertOpen = true;
-                alert("Right-click is disabled!");
-                isAlertOpen = false;
             }
         });
     </script>
