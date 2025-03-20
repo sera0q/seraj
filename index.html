@@ -9,6 +9,8 @@
             font-family: Arial, sans-serif;
             text-align: center;
             background-color: #f4f4f4;
+            margin: 0;
+            padding: 0;
         }
         .container {
             width: 80%;
@@ -16,10 +18,12 @@
             padding: 20px;
             background: white;
             box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            border-radius: 10px;
         }
         #timer {
             font-size: 24px;
             color: green;
+            font-weight: bold;
         }
         #examFrame {
             width: 100%;
@@ -29,11 +33,19 @@
         }
         #startBtn {
             padding: 10px 20px;
-            font-size: 18px;
+            font-size: 16px;
             background-color: blue;
             color: white;
             border: none;
             cursor: pointer;
+            border-radius: 5px;
+        }
+        #startBtn:hover {
+            background-color: darkblue;
+        }
+        .warning {
+            color: red;
+            font-weight: bold;
         }
     </style>
 </head>
@@ -47,12 +59,12 @@
 
     <div class="container" id="examPage" style="display:none;">
         <h2>Placement Test</h2>
-        <p>Time Remaining: <span id="timer">50:00</span></p>
+        <p>Time Remaining: <span id="timer">10:00</span></p>
         <iframe id="examFrame" src="https://docs.google.com/forms/d/e/1FAIpQLSfpBaiBgM_dhm93cIwG9kWKZFSx7E8XM2UxRkb3GOo939GRjA/viewform?usp=header"></iframe>
     </div>
 
     <script>
-        let timeLeft = 3000;
+        let timeLeft = 600; // 10 minutes
         let warningIssued = false;
 
         function startExam() {
@@ -69,21 +81,23 @@
                 let seconds = timeLeft % 60;
                 timerElement.innerHTML = `${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
                 
-                if (timeLeft <= 600) {
+                if (timeLeft <= 300 && !warningIssued) {
                     timerElement.style.color = "red";
+                    alert("Warning: Only 5 minutes remaining!");
+                    warningIssued = true;
                 }
 
                 if (timeLeft <= 0) {
                     clearInterval(countdown);
                     alert("Time is up! Submitting your exam.");
-                    document.getElementById("examFrame").submit();
+                    document.getElementById("examFrame").contentWindow.document.forms[0].submit();
                 }
                 timeLeft--;
             }, 1000);
         }
 
         document.addEventListener("keydown", function (event) {
-            if (event.key === "Shift" || event.ctrlKey) {
+            if (event.key === "Shift" || event.ctrlKey || event.metaKey) {
                 event.preventDefault();
                 alert("Shift, Ctrl, and Right-Click are blocked!");
             }
@@ -93,7 +107,16 @@
             event.preventDefault();
             alert("Right-click is disabled!");
         });
+
+        window.addEventListener("blur", function () {
+            alert("Warning: Do not leave this page! Your exam will be submitted if you leave.");
+            window.focus();
+        });
+
+        window.addEventListener("beforeunload", function (event) {
+            event.preventDefault();
+            event.returnValue = "Are you sure you want to leave? Your exam will be submitted.";
+        });
     </script>
 </body>
 </html>
-
