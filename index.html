@@ -8,74 +8,86 @@
         body {
             font-family: Arial, sans-serif;
             text-align: center;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 0;
         }
         .container {
+            width: 50%;
+            margin: auto;
+            padding: 20px;
+            background: white;
+            box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
             margin-top: 50px;
         }
         #timer {
-            font-size: 20px;
+            font-size: 24px;
             font-weight: bold;
             color: green;
         }
+        .hidden {
+            display: none;
+        }
+        button {
+            padding: 10px 20px;
+            font-size: 18px;
+            cursor: pointer;
+        }
     </style>
-    <script>
-        let timeLeft = 50 * 60; // 50 minutes in seconds
-        let timerInterval;
+</head>
+<body>
+    <div id="welcome" class="container">
+        <img src="Cambright.Lan.png" alt="Cambright Logo" width="100%">
+        <p>Our English Placement Test is designed to assess your current proficiency level and help us recommend the most suitable learning program for you.</p>
+        <button onclick="startExam()">Start Exam</button>
+    </div>
 
-        function startTest() {
-            document.getElementById("welcome").style.display = "none";
-            document.getElementById("exam").style.display = "block";
+    <div id="exam" class="container hidden">
+        <h2>English Placement Test</h2>
+        <p>Time Remaining: <span id="timer">50:00</span></p>
+        <iframe src="https://docs.google.com/forms/d/e/1FAIpQLSfpBaiBgM_dhm93cIwG9kWKZFSx7E8XM2UxRkb3GOo939GRjA/viewform?embedded=true" width="100%" height="600px"></iframe>
+    </div>
+
+    <script>
+        let timeLeft = 50 * 60;
+        let timerElement = document.getElementById("timer");
+        let examStarted = false;
+
+        function startExam() {
+            document.getElementById("welcome").classList.add("hidden");
+            document.getElementById("exam").classList.remove("hidden");
+            examStarted = true;
             startTimer();
         }
 
         function startTimer() {
-            timerInterval = setInterval(function () {
-                let minutes = Math.floor(timeLeft / 60);
-                let seconds = timeLeft % 60;
-                document.getElementById("timer").innerText = `${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
-                
-                if (timeLeft <= 600) {
-                    document.getElementById("timer").style.color = "red";
-                }
-                
+            let timerInterval = setInterval(() => {
                 if (timeLeft <= 0) {
                     clearInterval(timerInterval);
-                    document.getElementById("examForm").submit();
+                    alert("Time is up! Submitting your exam.");
+                    document.querySelector("iframe").src += "&submit=1";
+                }
+                let minutes = Math.floor(timeLeft / 60);
+                let seconds = timeLeft % 60;
+                timerElement.textContent = `${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
+                if (timeLeft <= 600) {
+                    timerElement.style.color = "red";
                 }
                 timeLeft--;
             }, 1000);
         }
-        
-        // Block certain keys and actions
-        document.addEventListener("keydown", function (event) {
-            if (event.ctrlKey || event.shiftKey || event.key === "F12") {
-                event.preventDefault();
-                alert("This action is disabled during the test.");
-            }
+
+        window.addEventListener("blur", function () {
+            if (examStarted) alert("Warning: Do not leave the exam window!");
         });
 
-        document.addEventListener("contextmenu", function (event) {
-            event.preventDefault();
-            alert("Right-click is disabled during the test.");
-        });
-
-        document.addEventListener("visibilitychange", function () {
-            if (document.hidden) {
-                alert("Warning: You left the test window!");
+        document.addEventListener("contextmenu", (e) => e.preventDefault());
+        document.addEventListener("keydown", (e) => {
+            if (e.ctrlKey || e.shiftKey || e.key === "F12") {
+                e.preventDefault();
+                alert("Action blocked!");
             }
         });
     </script>
-</head>
-<body>
-    <div id="welcome" class="container">
-        <img src="Cambright.Lan.png" alt="Cambright Logo" width="300">
-        <h2>Our English Placement Test is designed to assess your current proficiency level and help us recommend the most suitable learning program for you.</h2>
-        <button onclick="startTest()">Start Test</button>
-    </div>
-
-    <div id="exam" class="container" style="display: none;">
-        <p>Time Left: <span id="timer">50:00</span></p>
-        <iframe id="examForm" src="https://docs.google.com/forms/d/e/1FAIpQLSfpBaiBgM_dhm93cIwG9kWKZFSx7E8XM2UxRkb3GOo939GRjA/viewform?embedded=true" width="640" height="800"></iframe>
-    </div>
 </body>
 </html>
