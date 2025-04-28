@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Login</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            padding-top: 100px;
+        }
+        input {
+            padding: 10px;
+            font-size: 16px;
+            margin-bottom: 20px;
+        }
+        button {
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <h2>Admin Login</h2>
+    <input type="password" id="password" placeholder="Enter admin password" />
+    <button onclick="checkPassword()">Login</button>
+
+    <script>
+        // Admin password (you can change it here)
+        const correctPassword = "Evolv5S";
+
+        function checkPassword() {
+            const enteredPassword = document.getElementById('password').value;
+            if (enteredPassword === correctPassword) {
+                // If password is correct, save the state to localStorage and redirect to the admin page
+                localStorage.setItem("adminLoggedIn", "true");
+                window.location.href = "admin.html";  // Redirect to your admin page
+            } else {
+                alert("Incorrect password! Please try again.");
+            }
+        }
+    </script>
+</body>
+</html>

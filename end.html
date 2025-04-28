@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Exam Submitted</title>
+<style>
+/* ---------- layout ---------- */
+body{
+  font-family: "Segoe UI", Arial, sans-serif;
+  background:#e9f7fb;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  min-height:100vh;
+  margin:0;
+}
+.card{
+  width:90%;max-width:520px;
+  background:#ffffff;
+  border-radius:16px;
+  box-shadow:0 6px 18px rgba(0,0,0,.12);
+  padding:45px 35px;
+  text-align:center;
+}
+.logo{
+  width:140px;height:auto;margin-bottom:28px;
+}
+h2{
+  margin:0 0 18px 0;
+  font-size:26px;
+  color:#0097a7;               /* teal heading */
+  letter-spacing:.3px;
+}
+p{
+  margin:0;
+  font-size:17px;
+  color:#555;
+}
+.check{
+  font-size:64px;
+  color:#26c6da;               /* lighter teal tick */
+  line-height:1;
+  margin-bottom:18px;
+}
+/* disable navigation / refresh keys */
+body,html{user-select:none;}
+</style>
+</head>
+<body oncontextmenu="return false">
+  <div class="card">
+    <!-- ===== place your logo here ===== -->
+    <img src="1.png" alt="Logo" class="logo">
+
+    <div class="check">✓</div>
+    <h2>Your response has been recorded</h2>
+    <p>You may now close this window.</p>
+  </div>
+
+  <script>
+    // Clear the history and prevent returning to the exam page
+    history.pushState(null, "", location.href);   // Add current entry to history
+    window.history.forward();                      // Move forward to prevent back navigation
+  
+    window.addEventListener("popstate", function() {
+      window.history.forward();                   // Re-enable forward when back is pressed
+    });
+  
+    // Disable common back/refresh keys
+    document.addEventListener('keydown', e => {
+      const blk = ['Backspace', 'Escape', 'F5'];
+      if (blk.includes(e.key) || (e.ctrlKey && ['r', 'R'].includes(e.key))) {
+        e.preventDefault();
+      }
+    });
+    </script> 
+</body>
+</html>

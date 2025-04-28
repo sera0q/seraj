@@ -1,0 +1,738 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Cambright Placement Test</title>
+<style>
+/* ===== BASIC LAYOUT ===== */
+body{font-family:Arial,Helvetica,sans-serif;margin:0;background:#f4f4f9}
+.container{max-width:900px;margin:40px auto;padding:25px;background:#fff;border-radius:8px;box-shadow:0 4px 8px rgba(0,0,0,.1)}
+.exam-header{display:flex;justify-content:space-between;align-items:center;border-bottom:2px solid #ccc;padding-bottom:15px;margin-bottom:25px}
+.timer{font-size:22px;font-weight:700;color:#e53935}
+/* ===== COMMON ELEMENTS ===== */
+.instruction-box{background:#eef;padding:12px;border-left:5px solid #2196F3;margin-bottom:18px}
+.section{margin-bottom:30px}
+.question-box{margin:12px 0;padding:12px;border:1px solid #ccc;border-radius:6px;background:#f9f9f9}
+.navigation{display:flex;justify-content:space-between;margin-top:20px}
+button{background:#2a8cff;color:#fff;border:none;border-radius:5px;padding:10px 22px;font-size:16px;cursor:pointer}
+button:hover{background:#005fcc}
+.hidden{display:none}
+textarea{width:100%;padding:10px;border:1px solid #ccc;border-radius:6px}
+input[type=radio]{margin-right:6px}
+</style>
+</head>
+<body>
+<div class="container">
+  <div class="exam-header">
+    <h1>Cambright Placement Test</h1>
+    <div id="timer" class="timer">⏳ 50:00</div>
+  </div>
+
+  <!-- ===== INTRO ===== -->
+  <div id="intro-section" class="section">
+    <div class="instruction-box">
+      <h3>📘 Instructions:</h3>
+      <p>The test has 4 sections and lasts <strong>50 minutes</strong>. Click Start to begin.</p>
+    </div>
+    <button onclick="startReading()">Start Reading Section</button>
+  </div>
+
+  <!-- ===== READING ===== -->
+  <div id="reading-section" class="section hidden">
+    <div class="instruction-box">
+      <h3>📘 Instructions:</h3>
+      <p>In this section of the test, you will read some short passages and complete the information about them. For each item, choose the correct answer (a, b, c, or d).</p>
+    </div>
+    <h2>📖 Reading Section</h2>
+
+    <!-- 10 UNIQUE PASSAGES -->
+    <!-- ------------ 1 ------------ -->
+    <p><strong>Passage 1:An email, Subject:</strong><br>
+    <em>An email, Subject: 
+      Greetings from Florida! Hi, Sara.
+      I’m visiting my sister in Florida. It’s very warm and nice here. Every morning, I go to the beach and swim. Sometimes my sister comes home early, and we play tennis in the afternoon. And we always go for a long walk after that. I’m having a great time!
+      Love, Heather
+    </p>
+    <div class="question-box">
+      <p><strong>1. What does Heather do every morning?</strong></p>
+      <label><input type="radio" name="q1" value="a">Swims</label><br>
+      <label><input type="radio" name="q1" value="b">Plays tennis</label><br>
+      <label><input type="radio" name="q1" value="c">Goes for a walk</label><br>
+      <label><input type="radio" name="q1" value="d">Comes home early</label>
+    </div>
+
+
+    <!-- ------------ 2 ------------ -->
+    <p><strong>Passage 2:Helen is getting married and I’m tired.</strong><br>
+      This has been a crazy week! One of my friends is getting married on Saturday, and I’m helping her with the reception. It’s not going to be a big party, but I still have to do a lot of things. For example, I chose the songs last week, but the band is playing them for me tonight. I bought the flowers today, but I have to pick them up on Friday. I’m tired. Can someone help me, please?!
+      </p>
+    <div class="question-box">
+        <p><strong>2.The writer _____.</strong></p>
+        <label><input type="radio" name="q2" value="a">is singing tonight</label><br>
+        <label><input type="radio" name="q2" value="b">is buying flowers on Friday</label><br>
+        <label><input type="radio" name="q2" value="c">listened to a band a week ago</label><br>
+        <label><input type="radio" name="q2" value="d">is going to a party this weekend</label>
+      </div>
+
+    <!-- ------------ 3 ------------ -->
+    <p><strong>Passage 3:The Whitney Museum of American Art</strong><br>
+      The Whitney is one of the most famous art museums in New York City. It first opened in 1931 in Greenwich Village, and then it moved to two different places in 1954 and 1966. Since 2015, this museum of American art has been in a new building downtown. The new space is larger and more modern, and it has beautiful views of the Hudson River from its windows and café. Visit it next time you are in the city.
+      </p>
+    <div class="question-box">
+      <p><strong>3.	The Whitney Museum _____.</strong></p>
+      <label><input type="radio" name="q3" value="a">shows art from many countries</label><br>
+      <label><input type="radio" name="q3" value="b">moved to a smaller place in 2015</label><br>
+      <label><input type="radio" name="q3" value="c">has a place to eat and great views</label><br>
+      <label><input type="radio" name="q3" value="d">was in the same building since 1931</label>
+    </div>
+
+
+    <!-- ------------ 4 ------------ -->
+    <p><strong>Passage 4:Is sitting unhealthy?</strong><br>
+      If you have been sitting in an office for a long period of time, stand up and move for your health. Research has shown that too much sitting might cause higher blood pressure, add body fat, and increase the danger of death from heart disease. Studies have also suggested that moving more has a positive effect on a person’s health. So, what can an office worker do? Experts say that you should take a break from sitting every 30 minutes, stand more while working, and even walk when meeting with coworkers. Moving might save your life.</p>
+    <div class="question-box">
+      <p><strong>4.	The article suggests that 	 .</strong></p>
+      <label><input type="radio" name="q4" value="a">there is very little research about the effects of sitting</label><br>
+      <label><input type="radio" name="q4" value="b">sitting for a long time might be dangerous for your health</label><br>
+      <label><input type="radio" name="q4" value="c">office workers live longer than other types of workers</label><br>
+      <label><input type="radio" name="q4" value="d">people do not usually like to walk and exercise</label>
+    </div>
+    <div class="question-box">
+      <p><strong>5.According to the article, office workers should 	 .</strong></p>
+      <label><input type="radio" name="q5" value="a">stop working every half hour</label><br>
+      <label><input type="radio" name="q5" value="b">not work in an office if possible</label><br>
+      <label><input type="radio" name="q5" value="c">only stand or walk when you work</label><br>
+      <label><input type="radio" name="q5" value="d">move more to avoid serious heart problems</label>
+    </div>
+    
+
+    <!-- ------------ 5 ------------ -->
+    <p><strong>Passage 5:A changing neighborhood – for better or for worse?</strong><br>
+      Recently, an international online retailer opened an enormous, brand-new office in our neighborhood. Until then, there hadn’t been any major companies or huge buildings like this in the area – just small family-owned businesses. So, obviously, there has been a lot of discussion about it lately. Some people say the company is creating jobs and will attract other new businesses, but others complain that most of the new jobs will be low-paying. These people also believe that rising costs will push out independent businesses and make the neighborhood too expensive for its current residents. I can’t make up my mind whether the company will be a benefit for the neighborhood or not. It’s a complicated issue, and I’m not sure there is a right or wrong answer. What do you think?</p>
+    <div class="question-box">
+      <p><strong>6.The author of the blog post believes that 	 .</strong></p>
+      <label><input type="radio" name="q6" value="a">there may be both positive and negative consequences</label><br>
+      <label><input type="radio" name="q6" value="b">the changes will be helpful for most workers from the region</label><br>
+      <label><input type="radio" name="q6" value="c">there will soon be many more big companies in the neighborhood</label><br>
+      <label><input type="radio" name="q6" value="d">the changes will be mostly harmful for people who live in the area</label>
+    </div>
+    <div class="question-box">
+      <p><strong>7.Some people think the company will help the area because it will 	 .</strong></p>
+      <label><input type="radio" name="q7" value="a">create a greater number of jobs with excellent salaries</label><br>
+      <label><input type="radio" name="q7" value="b">make the area more interesting to other companies</label><br>
+      <label><input type="radio" name="q7" value="c">lower the cost of living in the neighborhood</label><br>
+      <label><input type="radio" name="q7" value="d">replace smaller stores with larger ones</label>
+    </div>
+    
+
+    <!-- ------------ 6 ------------ -->
+    <p><strong>Passage 6:An inspiring story</strong><br>
+      When Alex McGovern was in high school, he used to earn money working weekends at a local bakery. After working there for several months, helping bake fresh bread and cakes, Alex noticed a familiar pattern: a huge amount of food was thrown away at the end of each day. It was food that the bakery could no longer sell, but it was still good enough to eat. So Alex began to wonder what he could do with all of this extra food. With the bakery owner’s permission, he reached out to a local organization that worked with families who need help with food and housing. The charity was extremely pleased and arranged to pick up the extra food each day. Now bread was no longer wasted, but generously shared with people in need.
+      Alex’s idea was such a success that he began approaching other local restaurants about joining the program. Before long, there were over a dozen businesses taking part, and Alex created a website to grow the program in other cities. Today Alex’s “simple” idea is helping feed people all over the country!
+      </p>
+    <div class="question-box">
+      <p><strong>8.Alex’s original goal at the bakery was to _____.</strong></p>
+      <label><input type="radio" name="q8" value="a">eat free bread and cake</label><br>
+      <label><input type="radio" name="q8" value="b">learn to be a baker</label><br>
+      <label><input type="radio" name="q8" value="c">make money</label><br>
+      <label><input type="radio" name="q8" value="d">help people</label>
+    </div>
+    <div class="question-box">
+      <p><strong>9.Alex got his idea _____.</strong></p>
+      <label><input type="radio" name="q9" value="a">when he saw how much food was wasted</label><br>
+      <label><input type="radio" name="q9" value="b">while he was baking some fresh bread</label><br>
+      <label><input type="radio" name="q9" value="c">from the owner of the bakery</label><br>
+      <label><input type="radio" name="q9" value="d">from a local organization</label>
+    </div>
+    <div class="question-box">
+      <p><strong>10.The bakery owner _____.</strong></p>
+      <label><input type="radio" name="q10" value="a">thought that Alex’s plans wouldn’t work</label><br>
+      <label><input type="radio" name="q10" value="b">allowed Alex to give away the extra bread</label><br>
+      <label><input type="radio" name="q10" value="c">helped Alex create a website for the organization</label><br>
+      <label><input type="radio" name="q10" value="d">didn’t care about the families assisted by the charity</label>
+    </div>
+    <div class="question-box">
+      <p><strong>11.The extra food was _____.</strong></p>
+      <label><input type="radio" name="q11" value="a">sold by Alex</label><br>
+      <label><input type="radio" name="q11" value="b">bought by the charity</label><br>
+      <label><input type="radio" name="q11" value="c">delivered by the bakery</label><br>
+      <label><input type="radio" name="q11" value="d">picked up by the organization</label>
+    </div>
+
+    <!-- ------------ 7 ------------ -->
+    <p><strong>Passage 7:Some thoughts on your online profile</strong><br>
+      In many ways, the internet has made it easier than ever to find out about new job opportunities. Yet, as companies increasingly examine candidates’ social media profiles for information to use in the selection process, people need to be aware of the risks and rewards of posting online. The views they express—and the ways they choose to express them—can be a crucial factor in whether or not they receive an offer of employment.
+      Many young adults, who have grown up with social media and are comfortable sharing their lives online, don’t realize how employers are using social media in hiring decisions. These companies don’t just consider information about a person’s online behavior; they may even gather information about friends and family. Some fear that employers may judge candidates based on factors such as their medical history, age, or even beliefs.
+      While there is currently debate about what information companies are allowed to legally collect or use for hiring decisions, everyone agrees that people need to be careful about what they post online. Your behavior on social media could cost you your current position or job opportunities in the future.
+      So, should job applicants erase their social media accounts completely? According to Professor John Sacks of the Better Hiring Institute, “It would be better to make sure you have a strong professional profile that emphasizes your qualifications. Not having any social media might send the message that you have something to hide.” In other words, take the time to create an attractive profile on a career site and carefully consider everything you post online.
+      </p>
+    <div class="question-box">
+      <p><strong>12	This article is aimed primarily at _____.</strong></p>
+      <label><input type="radio" name="q12" value="a">Employers</label><br>
+      <label><input type="radio" name="q12" value="b">college students</label><br>
+      <label><input type="radio" name="q12" value="c">potential job candidates</label><br>
+      <label><input type="radio" name="q12" value="d">social media organizations</label>
+    </div>
+    <div class="question-box">
+      <p><strong>13.According to the author, some people may not realize _____.</strong></p>
+      <label><input type="radio" name="q13" value="a">the effect of their online behavior on friends and family</label><br>
+      <label><input type="radio" name="q13" value="b">how their online profiles can affect hiring decisions</label><br>
+      <label><input type="radio" name="q13" value="c">what information companies cannot legally collect</label><br>
+      <label><input type="radio" name="q13" value="d">if their online profile looks professional enough </label>
+    </div>
+    <div class="question-box">
+      <p><strong>14.One way of increasing your chances of getting a good job is _____.</strong></p>
+      <label><input type="radio" name="q14" value="a">not keeping a profile online</label><br>
+      <label><input type="radio" name="q14" value="b">expressing your opinions in a honest way</label><br>
+      <label><input type="radio" name="q14" value="c">having a profile that clearly shows your skills</label><br>
+      <label><input type="radio" name="q14" value="d">being secretive about what you share online</label>
+    </div>
+    <div class="question-box">
+      <p><strong>15.The author _____ online personal information to make hiring decisions.</strong></p>
+      <label><input type="radio" name="q15" value="a">is against companies using</label><br>
+      <label><input type="radio" name="q15" value="b">is in favor of the practice of using</label><br>
+      <label><input type="radio" name="q15" value="c">believes it does not matter if employers use</label><br>
+      <label><input type="radio" name="q15" value="d">does not say whether it is good or bad to use</label>
+    </div>
+
+    <!-- ------------ 8 ------------ -->
+    <p><strong>Passage 8:Sleep deprivation</strong><br>
+      If you can sleep well, be grateful. Sleep deprivation is extremely common, and its side effects are both serious and underappreciated. It is estimated that 50–70 million people in the U.S. suffer from a sleep disorder, and yet too many of them do not seek medical help. Although occasional sleep interruptions are generally no more than a nuisance, continuous lack of sleep can lead to excessive daytime sleepiness, emotional difficulties, poor job performance, and even obesity.
+      Sleep deprivation also impacts mental well-being. A study done by the U.K. Mental Health Foundation found that people who didn’t get enough sleep were about three times more likely to exhibit poor concentration and four times more likely to have relationship problems. According to another study, by the University of Warwick, getting less than six hours of sleep on a continuous basis makes a person 48% more likely to die of heart disease and 15% more likely to develop a stroke. According to study co-author Professor Francesco Cappuccio, lack of sleep “is like a ticking time bomb for your health.”
+      If a person is experiencing difficulties falling and staying asleep, there are several effective methods that can help and do not require medication. These include relaxation techniques, like tightening and relaxing muscles, breathing slowly, and meditating; stimulation control, which involves controlling
+      pre-bedtime activities and surroundings; and cognitive behavioral therapy (CBT), designed to help people understand and change their thought patterns. If sleep deprivation and negative symptoms continue, however, consultation with a doctor is recommended. It’s essential not to underestimate the importance of adequate sleep to maintaining good mental and physical health.
+      </p>
+    <div class="question-box">
+      <p><strong>16.The main idea of the article is that _____.</strong></p>
+      <label><input type="radio" name="q16" value="a">lack of sleep can have significant health consequences</label><br>
+      <label><input type="radio" name="q16" value="b">sleeping is not as essential as people used to think</label><br>
+      <label><input type="radio" name="q16" value="c">people underestimate how much sleep they need</label><br>
+      <label><input type="radio" name="q16" value="d">relaxation techniques are important for a good night’s sleep</label>
+    </div>
+    <div class="question-box">
+      <p><strong>17.According to the article, many people with sleeping disorders _____.</strong></p>
+      <label><input type="radio" name="q17" value="a">breathe more slowly</label><br>
+      <label><input type="radio" name="q17" value="b">do cognitive behavioral therapy</label><br>
+      <label><input type="radio" name="q17" value="c">do not speak to their doctor about it</label><br>
+      <label><input type="radio" name="q17" value="d">usually practice healthy sleeping habits</label>
+    </div>
+    <div class="question-box">
+      <p><strong>18.The article suggests that good sleepers _____.</strong></p>
+      <label><input type="radio" name="q18" value="a">can focus better</label><br>
+      <label><input type="radio" name="q18" value="b">often get about eight hours of good sleep</label><br>
+      <label><input type="radio" name="q18" value="c">are able to sleep during the day</label><br>
+      <label><input type="radio" name="q18" value="d">do not have heart proble </label>
+    </div>
+    <div class="question-box">
+      <p><strong>19.Professor Cappuccio found that _____.</strong></p>
+      <label><input type="radio" name="q19" value="a">sleep-deprived people have more relationship problems</label><br>
+      <label><input type="radio" name="q19" value="b">sleep deprivation might make people critically ill</label><br>
+      <label><input type="radio" name="q19" value="c">research from the Mental Health Foundation was incorrect</label><br>
+      <label><input type="radio" name="q19" value="d">lack of sleep is just a minor nuisance </label>
+    </div>
+    
+    <div class="question-box">
+      <p><strong>20.The article says that people experiencing sleep difficulties can _____. </strong></p>
+      <label><input type="radio" name="q20" value="a">lose some weight</label><br>
+      <label><input type="radio" name="q20" value="b">take some types of medicine</label><br>
+      <label><input type="radio" name="q20" value="c">immediately find medical help</label><br>
+      <label><input type="radio" name="q20" value="d">try methods that help them fall and stay asleep</label>
+    </div>
+    <div class="navigation">
+      <button onclick="goToGrammar()">Next ▶ Language Section</button>
+    </div>
+  </div>
+ 
+
+  <!-- ===== GRAMMAR (one‑by‑one) ===== -->
+  <div id="grammar-section" class="section hidden">
+    <div class="instruction-box"><h3>📘 Instructions:</h3><p>This section of the test is about the use of English. For each item, choose the correct answer (a, b, c, or d) and mark it on your answer sheet. There are 30 items, </p></div>
+    <h2>📝 Language Section</h2>
+
+    <div class="g-item">
+      <div class="question-box">
+        <p><strong>1. 21	My daughter sometimes _____ to school with her friends.</strong></p>
+        <label><input type="radio" name="g1" value="a">Walk.</label><br>
+        <label><input type="radio" name="g1" value="b">walks</label><br>
+        <label><input type="radio" name="g1" value="c">walking</label><br>
+        <label><input type="radio" name="g1" value="d">not walk</label>
+      </div>
+      <div class="question-box">
+        <p><strong>2._____ eat dinner on Sundays?</strong></p>
+        <label><input type="radio" name="g2" value="a">Where your family</label><br>
+        <label><input type="radio" name="g2" value="b">How is your family</label><br>
+        <label><input type="radio" name="g2" value="c">When your family do</label><br>
+        <label><input type="radio" name="g2" value="d">What time does your family</label>
+      </div>
+      <div class="question-box">
+        <p><strong>3._____ a lot of people in the park today.</strong></p>
+        <label><input type="radio" name="g3" value="a">There</label><br>
+        <label><input type="radio" name="g3" value="b">There’s</label><br>
+        <label><input type="radio" name="g3" value="c">There are</label><br>
+        <label><input type="radio" name="g3" value="d">There is no</label>
+      </div>
+      <div class="question-box">
+        <p><strong>4._____, but I’m not very good.</strong></p>
+        <label><input type="radio" name="g4" value="a">I can play the guitar</label><br>
+        <label><input type="radio" name="g4" value="b">I don’t play the guitar</label><br>
+        <label><input type="radio" name="g4" value="c">I play the guitar very well</label><br>
+        <label><input type="radio" name="g4" value="d">I can’t play the guitar well </label>
+      </div>
+      <div class="question-box">
+        <p><strong>5.We had a nice vacation. The weather _____ beautiful.</strong></p>
+        <label><input type="radio" name="g5" value="a">did</label><br>
+        <label><input type="radio" name="g5" value="b">was</label><br>
+        <label><input type="radio" name="g5" value="c">does</label><br>
+        <label><input type="radio" name="g5" value="d">were</label>
+      </div>
+      <div class="question-box">
+        <p><strong>6.26	Tom _____ home right now. He’s still at the office.</strong></p>
+        <label><input type="radio" name="g6" value="a">isn’t driving</label><br>
+        <label><input type="radio" name="g6" value="b">doesn’t drive</label><br>
+        <label><input type="radio" name="g6" value="c">didn’t drive</label><br>
+        <label><input type="radio" name="g6" value="d">drives</label>
+      </div>
+      <div class="question-box">
+        <p><strong>7. Is it true? _____ a grandparent yesterday?</strong></p>
+        <label><input type="radio" name="g7" value="a">Are you becoming</label><br>
+        <label><input type="radio" name="g7" value="b">Does she become</label><br>
+        <label><input type="radio" name="g7" value="c">Did he become</label><br>
+        <label><input type="radio" name="g7" value="d">They became</label>
+      </div>
+      <div class="question-box">
+        <p><strong>8.I go to the gym _____ evenings. I only don’t go on the weekend.</strong></p>
+        <label><input type="radio" name="g8" value="a">some</label><br>
+        <label><input type="radio" name="g8" value="b">most</label><br>
+        <label><input type="radio" name="g8" value="c">all of the</label><br>
+        <label><input type="radio" name="g8" value="d">many of the</label>
+      </div>
+      <div class="question-box">
+        <p><strong>9.Susan’s cousin is 	 player on our soccer team.</strong></p>
+        <label><input type="radio" name="g9" value="a">best</label><br>
+        <label><input type="radio" name="q9" value="b">bad</label><br>
+        <label><input type="radio" name="q9" value="c">worse</label><br>
+        <label><input type="radio" name="q9" value="d">the worst</label>
+      </div>
+      <div class="question-box">
+        <p><strong>10.Our neighbor _____ the screen of his phone twice last year.</strong></p>
+        <label><input type="radio" name="g10" value="a">Breaks</label><br>
+        <label><input type="radio" name="g10" value="b">is breaking</label><br>
+        <label><input type="radio" name="g10" value="c">has broken</label><br>
+        <label><input type="radio" name="g10" value="d">broke</label>
+      </div>
+      <div class="question-box">
+        <p><strong>11.A: I can’t forget to make a reservation at the restaurant before noon.
+                      B: Don’t worry. _____ you.
+          </strong></p>
+        <label><input type="radio" name="g11" value="a">I’m reminding</label><br>
+        <label><input type="radio" name="g11" value="b">I’ve reminded</label><br>
+        <label><input type="radio" name="g11" value="c">I’ll remind</label><br>
+        <label><input type="radio" name="g11" value="d">I remind</label>
+      </div>
+      <div class="question-box">
+        <p><strong>12.We _____ for a hotel when the storm began.</strong></p>
+        <label><input type="radio" name="g12" value="a">search</label><br>
+        <label><input type="radio" name="g12" value="b">will search</label><br>
+        <label><input type="radio" name="g12" value="c">have searched</label><br>
+        <label><input type="radio" name="g12" value="d">were searching</label>
+      </div>
+      <div class="question-box">
+        <p><strong>13.If you _____ concentrate on your work, you usually waste a lot of time.</strong></p>
+        <label><input type="radio" name="g13" value="a">don’t</label><br>
+        <label><input type="radio" name="g13" value="b">won’t</label><br>
+        <label><input type="radio" name="g13" value="c">didn’t</label><br>
+        <label><input type="radio" name="g13" value="d">couldn’t</label>
+      </div>
+      <div class="question-box">
+        <p><strong>14.I’m exhausted. _____ to fix this machine since I got here this morning.</strong></p>
+        <label><input type="radio" name="g14" value="a">I try</label><br>
+        <label><input type="radio" name="g14" value="b">I’ll try</label><br>
+        <label><input type="radio" name="g14" value="c">I tried</label><br>
+        <label><input type="radio" name="g14" value="d">I’ve been trying</label>
+      </div>
+      <div class="question-box">
+        <p><strong>15.Several bridges _____ during the earthquake last year.</strong></p>
+        <label><input type="radio" name="g15" value="a">badly damaged</label><br>
+        <label><input type="radio" name="g15" value="b">were badly damaged</label><br>
+        <label><input type="radio" name="g15" value="c">have badly damaged</label><br>
+        <label><input type="radio" name="g15" value="d">were badly damaging </label>
+      </div>
+      <div class="question-box">
+        <p><strong>16.The agency _____ that our ideas for the poster seem a little old-fashioned.</strong></p>
+        <label><input type="radio" name="g16" value="a">Believes</label><br>
+        <label><input type="radio" name="g16" value="b">is believing</label><br>
+        <label><input type="radio" name="g16" value="c">was believed</label><br>
+        <label><input type="radio" name="g16" value="d">has been believing</label>
+      </div>
+      <div class="question-box">
+        <p><strong>17.Superhero movies are a kind of entertainment _____ really attracted to.</strong></p>
+        <label><input type="radio" name="g17" value="a">Which</label><br>
+        <label><input type="radio" name="g17" value="b">I’m not</label><br>
+        <label><input type="radio" name="g17" value="c">who they</label><br>
+        <label><input type="radio" name="g17" value="d">that aren’t</label>
+      </div>
+      <div class="question-box">
+        <p><strong>18.More support _____ to groups dealing with environmental issues.</strong></p>
+        <label><input type="radio" name="g18" value="a">is providing</label><br>
+        <label><input type="radio" name="g18" value="b">might provide</label><br>
+        <label><input type="radio" name="g18" value="c">must be provided</label><br>
+        <label><input type="radio" name="g18" value="d">should be providing</label>
+      </div>
+      <div class="question-box">
+        <p><strong>19.Employees _____ show their ID cards, or they couldn’t have access to the research facilities.</strong></p>
+        <label><input type="radio" name="g19" value="a">were required to</label><br>
+        <label><input type="radio" name="g19" value="b">were allowed to</label><br>
+        <label><input type="radio" name="g19" value="c">didn’t have to</label><br>
+        <label><input type="radio" name="g19" value="d">could</label>
+      </div>
+      <div class="question-box">
+        <p><strong>20.Our math teacher made _____ a hundred math problems in one hour.</strong></p>
+        <label><input type="radio" name="g20" value="a">us to solve</label><br>
+        <label><input type="radio" name="g20" value="b">be solved</label><br>
+        <label><input type="radio" name="g20" value="c">us solve</label><br>
+        <label><input type="radio" name="g20" value="d">solve</label>
+      </div>
+      <div class="question-box">
+        <p><strong>21.The process _____ be very time-consuming before they launched the new system.</strong></p>
+        <label><input type="radio" name="g21" value="a">Might</label><br>
+        <label><input type="radio" name="g21" value="b">would</label><br>
+        <label><input type="radio" name="g21" value="c">ought to</label><br>
+        <label><input type="radio" name="g21" value="d">used to</label>
+      </div>
+      <div class="question-box">
+        <p><strong>22.After some time together, those on John’s team learned not to underestimate _____.</strong></p>
+        <label><input type="radio" name="g22" value="a">each other</label><br>
+        <label><input type="radio" name="g22" value="b">himself</label><br>
+        <label><input type="radio" name="g22" value="c">another</label><br>
+        <label><input type="radio" name="g22" value="d">itself</label>
+      </div>
+      <div class="question-box">
+        <p><strong>23.The man next door asked me _____ keep an eye on his apartment while he was away.</strong></p>
+        <label><input type="radio" name="g23" value="a">I can</label><br>
+        <label><input type="radio" name="g23" value="b">would I</label><br>
+        <label><input type="radio" name="g23" value="c">if I could</label><br>
+        <label><input type="radio" name="g23" value="d">whether will I</label>
+      </div>
+      <div class="question-box">
+        <p><strong>24.Our niece is very hardworking and determined. She has never had any trouble _____ her exams.</strong></p>
+        <label><input type="radio" name="g24" value="a">to pass</label><br>
+        <label><input type="radio" name="g24" value="b">passing</label><br>
+        <label><input type="radio" name="g24" value="c">passed</label><br>
+        <label><input type="radio" name="g24" value="d">pass</label>
+      </div>
+      <div class="question-box">
+        <p><strong>25.If they _____ the damage more carefully, they would have found these other problems.</strong></p>
+        <label><input type="radio" name="g25" value="a">would assess</label><br>
+        <label><input type="radio" name="g25" value="b">had assessed</label><br>
+        <label><input type="radio" name="g25" value="c">have assessed</label><br>
+        <label><input type="radio" name="g25" value="d">would have assessed</label>
+      </div>
+      <div class="question-box">
+        <p><strong>26.By this time next Monday, _____ a new head of the sales department.</strong></p>
+        <label><input type="radio" name="g26" value="a">we hire</label><br>
+        <label><input type="radio" name="g26" value="b">we’re hiring</label><br>
+        <label><input type="radio" name="g26" value="c">we’ll have hired</label><br>
+        <label><input type="radio" name="g26" value="d">we have been hiring</label>
+      </div>
+      <div class="question-box">
+        <p><strong>27.The consultants proposed a number of alternatives, _____ the firm disregarded.</strong></p>
+        <label><input type="radio" name="g27" value="a">much of what</label><br>
+        <label><input type="radio" name="g27" value="b">many of which</label><br>
+        <label><input type="radio" name="g27" value="c">some of whom</label><br>
+        <label><input type="radio" name="g27" value="d">none of whose</label>
+      </div>
+      <div class="question-box">
+        <p><strong>28.What _____ a couple of relaxing days at an unspoiled beach.</strong></p>
+        <label><input type="radio" name="g28" value="a">they actually plan</label><br>
+        <label><input type="radio" name="g28" value="b">did they actually plan</label><br>
+        <label><input type="radio" name="g28" value="c">they actually planned was</label><br>
+        <label><input type="radio" name="g28" value="d">have they actually planned are</label>
+      </div>
+      <div class="question-box">
+        <p><strong>29.We felt genuinely shocked. Never again _____ at such an overrated place.</strong></p>
+        <label><input type="radio" name="g29" value="a">ate we</label><br>
+        <label><input type="radio" name="g29" value="b">we will eat</label><br>
+        <label><input type="radio" name="g29" value="c">did eat we</label><br>
+        <label><input type="radio" name="g29" value="d">would we eat</label>
+      </div>
+      <div class="question-box">
+        <p><strong>30.Authorities recommend that everyone _____ the highway until repairs are completed.</strong></p>
+        <label><input type="radio" name="g30" value="a">avoid</label><br>
+        <label><input type="radio" name="g30" value="b">avoided</label><br>
+        <label><input type="radio" name="g30" value="c">would avoid</label><br>
+        <label><input type="radio" name="g30" value="d">d	is going to avoid</label>
+      </div>
+  <div class="navigation">
+    <button onclick="showPrevGram()">◀ Previous</button>
+    <!-- last grammar item: Next goes to Writing -->
+    <button onclick="showNextGram()">Next ▶</button>
+  </div>
+</div>
+  </div>
+
+  <!-- ===== WRITING ===== -->
+  <div id="writing-section" class="section hidden">
+    <div class="instruction-box"><h3>📘 Instructions:</h3><p>Write 120‑150 words.</p></div>
+    <h2>✍️ Writing Section</h2>
+    <p>Describe a memorable holiday you had.</p>
+    <textarea rows="6" placeholder="Write your essay here…"></textarea>
+
+    <div class="navigation">
+      <button onclick="goToGrammar()">◀ Previous</button>
+      <button onclick="goToVideo()">Next ▶ Record Video</button>
+    </div>
+  </div>
+
+<!-- ===== VIDEO ===== -->
+<div id="video-section" class="section hidden">
+  <div class="instruction-box">
+    <h3>📘 Instructions:</h3>
+    <p>Record a <strong>maximum 1‑minute</strong> video introducing yourself and your English‑learning goals.<br>
+       You can watch the preview and re‑record once if needed.</p>
+  </div>
+  
+  <h2>📹 Final Step: Record Video</h2>
+
+  <!-- Flex container for video and text side by side -->
+  <div style="display: flex; gap: 20px; align-items: flex-start; flex-wrap: wrap;">
+    <!-- Video preview -->
+    <div>
+      <video id="preview" width="400" height="300" autoplay muted playsinline 
+             style="background:#000;border:1px solid #ccc;border-radius:6px"></video>
+      <video id="playback" width="400" height="300" controls class="hidden" 
+             style="margin-top:15px;border:1px solid #ccc;border-radius:6px"></video>
+    </div>
+
+    <!-- Text on the right -->
+    <div style="max-width: 300px;">
+      <h4>🗒️ Tips:</h4>
+      <p style="margin-top: 0;">
+        Speak clearly and confidently. <br>
+        Mention your name, where you're from, and your goals for learning English.<br><br>
+        Example:<br>
+        "Hi, my name is Sarah. I'm from Libya. I'm learning English to study abroad and improve my career."
+      </p>
+    </div>
+  </div>
+
+  <!-- Navigation buttons -->
+  <div class="navigation" style="margin-top:20px; gap:10px">
+    <button id="startBtn" onclick="startRec()">🎥 Start</button>
+    <button id="stopBtn" onclick="stopRec()" disabled>⏹ Stop</button>
+    <button id="redoBtn" onclick="redoRec()" disabled>🔄 Re‑record</button>
+  </div>
+
+  <div class="navigation" style="margin-top:30px">
+    <button onclick="goToWriting()">◀ Previous</button>
+    <button onclick="finishExam()">Finish Exam</button>
+  </div>
+</div>
+
+
+<script>
+/* ===== VIDEO RECORD (1‑minute max, no download) ===== */
+let mediaStream=null, mediaRecorder=null, chunks=[], videoBlob=null;
+async function initCamera(){
+  if(mediaStream) return;
+  try{
+    mediaStream = await navigator.mediaDevices.getUserMedia({video:true,audio:true});
+    document.getElementById('preview').srcObject = mediaStream;
+  }catch(e){ alert('Webcam/microphone access denied.'); }
+}
+function startRec(){
+  initCamera().then(()=>{
+    chunks=[];
+    mediaRecorder = new MediaRecorder(mediaStream,{mimeType:'video/webm;codecs=vp9,opus'});
+    mediaRecorder.ondataavailable=e=>chunks.push(e.data);
+    mediaRecorder.onstop=handleStop;
+    mediaRecorder.start();
+    // UI
+    startBtn.disabled=true; stopBtn.disabled=false; redoBtn.disabled=true;
+    // Auto‑stop after 1 minute (60 000 ms)
+    setTimeout(()=>{ if(mediaRecorder?.state==='recording') stopRec(); },60000);
+  });
+}
+function stopRec(){
+  if(mediaRecorder?.state==='recording'){ mediaRecorder.stop(); stopBtn.disabled=true; }
+}
+function handleStop(){
+  videoBlob=new Blob(chunks,{type:'video/webm'});
+  playback.src=URL.createObjectURL(videoBlob);
+  playback.classList.remove('hidden');
+  redoBtn.disabled=false;          // allow one more take if they want
+}
+function redoRec(){
+  playback.classList.add('hidden'); playback.src=''; videoBlob=null;
+  startBtn.disabled=false; redoBtn.disabled=true;
+}
+</script>
+
+<script>
+/* ===== GLOBAL TIMER ===== */
+let timer=null, timeRemaining=50*60;
+function formatTime(s){return String(Math.floor(s/60)).padStart(2,"0")+":"+String(s%60).padStart(2,"0");}
+function startTimer(){ if(timer) return;
+  timer=setInterval(()=>{timeRemaining--;document.getElementById("timer").textContent="⏳ "+formatTime(timeRemaining);
+    if(timeRemaining<=0){clearInterval(timer);timer=null;finishExam();}
+  },1000);
+}
+function resetTimer(){clearInterval(timer);timer=null;timeRemaining=50*60;document.getElementById("timer").textContent="⏳ 50:00";}
+
+/* ===== SECTION UTIL ===== */
+function show(id){document.querySelectorAll(".section").forEach(s=>s.classList.add("hidden"));document.getElementById(id).classList.remove("hidden");}
+
+/* ===== NAVIGATION HANDLERS ===== */
+function startReading(){show("reading-section");startTimer();}
+function backToIntro(){show("intro-section");resetTimer();}
+function goToReading(){show("reading-section");}
+function goToGrammar(){show("grammar-section");}
+function goToWriting(){show("writing-section");}
+function goToVideo(){show("video-section");}
+
+/* ===== GRAMMAR CAROUSEL ===== */
+let gCurrent=0;
+const gItems=[...document.querySelectorAll('#grammar-section .g-item')];
+function updateGrammarView(){gItems.forEach((el,i)=>el.classList.toggle('hidden',i!==gCurrent));}
+function showNextGram(){ if(gCurrent<gItems.length-1){gCurrent++;updateGrammarView();} else {goToWriting();}}
+function showPrevGram(){ if(gCurrent>0){gCurrent--;updateGrammarView();} else {goToReading();}}
+updateGrammarView();   // initialise
+</script>
+<!-- ========== override / final handlers ========== -->
+<script>
+  /* ---------- FINAL finishExam(): no alerts, goes to end.html ---------- */
+  function finishExam(){
+    // friendly inline message
+    const msg=document.createElement('p');
+    msg.textContent = "Thank you! Redirecting…";
+    msg.style.cssText = "text-align:center;font:18px/1.3 sans-serif;margin:40px 0";
+    document.body.appendChild(msg);
+  
+    resetTimer();   // stop global timer
+  
+    /* ---- optional: save answers to localStorage ----
+    const subs = JSON.parse(localStorage.getItem('submissions')||'[]');
+    subs.push({
+      id : Date.now().toString(36),
+      ...(JSON.parse(localStorage.getItem('currentStudent')||'{}')),
+      mcqScore      : window.mcqScore  || 0,
+      writingAnswer : window.writingAns|| '',
+      writingScore  : null,
+      videoUrl      : null
+    });
+    localStorage.setItem('submissions', JSON.stringify(subs));
+    --------------------------------------------------- */
+  
+    // redirect after 1 second
+    setTimeout(()=> window.location.href = "end.html", 1000);
+  }
+  
+  /* Wire “Finish Exam” button once DOM is ready */
+  document.addEventListener('DOMContentLoaded', ()=>{
+    const btn = document.getElementById('finishBtn');  // ensure your button has this id
+    if(btn) btn.addEventListener('click', finishExam);
+  });
+  </script>
+  </body>
+  </html>
+  <!-- ========== override / final handlers ========== -->
+<!-- ─── Non‑blocking anti‑cheat & full‑screen lock ───────────────── -->
+<script>
+  /* Helper to show a temporary banner (never blocks) */
+  function warn(msg, sec=3, color='#e53935'){
+    let bar = document.getElementById('warnBanner');
+    if(!bar){
+      bar = document.createElement('div');
+      bar.id='warnBanner';
+      bar.style.cssText =
+        "position:fixed;top:0;left:0;width:100%;padding:10px 14px;"+
+        "font:15px/20px 'Segoe UI',Arial,sans-serif;text-align:center;"+
+        "color:#fff;z-index:99999;pointer-events:none";
+      document.body.appendChild(bar);
+    }
+    bar.textContent = msg;
+    bar.style.background = color;
+    bar.style.display   = 'block';
+    clearTimeout(bar._hide);
+    bar._hide = setTimeout(()=>bar.style.display='none',sec*1000);
+  }
+  
+  /* 1) Disable context menu & copy/paste/dev‑tools/reload */
+  document.addEventListener('contextmenu',e=>e.preventDefault());
+  document.addEventListener('keydown',e=>{
+    const mod=e.ctrlKey||e.metaKey;
+    if(mod && 'cCvVxXsSuU'.includes(e.key)) e.preventDefault();
+    if(e.key==='F12'||(mod&&e.shiftKey&&'Ii'.includes(e.key))) e.preventDefault();
+    if(e.key==='F5'||(mod&&'rR'.includes(e.key))) e.preventDefault();
+  });
+  
+  /* 2) Warn when window/tab loses focus */
+  let leftWin=false;
+  window.addEventListener('blur',()=>leftWin=true);
+  window.addEventListener('focus',()=>{ if(leftWin){ warn("Keep the exam window active.",3,"#f57c00"); leftWin=false; }});
+  
+  /* 3) Full‑screen lock */
+  let fsEsc=0;
+  function reqFS(){const d=document.documentElement;(d.requestFullscreen||d.webkitRequestFullscreen||d.msRequestFullscreen).call(d);}
+  ['fullscreenchange','webkitfullscreenchange','msfullscreenchange'].forEach(ev=>{
+    document.addEventListener(ev,()=>{
+      const inFs=document.fullscreenElement||document.webkitFullscreenElement||document.msFullscreenElement;
+      if(!inFs){
+        fsEsc++;
+        if(fsEsc===1){ warn("Stay in full‑screen during the exam.",3,"#f57c00"); reqFS(); }
+        else         { warn("Full‑screen exited twice – ending exam.",2); setTimeout(finishExam,1500); }
+      }
+    });
+  });
+  
+  /* 4) History trap prevents Back‑button */
+  history.pushState(null,'',location.href);
+  history.pushState(null,'',location.href);
+  window.addEventListener('popstate',()=>history.go(1));
+  
+  /* expose a helper to enter full‑screen once at start */
+  window.enableExamLock = ()=>reqFS();
+  </script>   
+  <script>
+    /* ───  MCQ auto‑grader ─────────────────────────────────────────── */
+    
+    /* 1. Answer key   { questionName : "correctOptionValue" }  */
+    const ANSWER_KEY = {
+      /* reading q1‑q20 (example values)  */
+      q1:"a", q2:"b", q3:"a", q4:"b", q5:"b", q6:"b",
+      q7:"b", q8:"b", q9:"b", q10:"b",q11:"b",q12:"b",
+      q13:"a",q14:"b",q15:"b",q16:"a",q17:"a",q18:"b",
+      q19:"b",q20:"b",
+      /* grammar g1‑g20 (example) */
+      g1:"b", g2:"b", g3:"b", g4:"b", g5:"b", g6:"b" , g7:"b" , g8:"b" , g9:"b" , g10:"b"
+       , g11:"b" , g12:"b" , g13:"b" , g14:"b" , g15:"b" , g16:"b" , g17:"b" , g18:"b" , g19:"b"
+        , g20:"b" , g21:"b" , g22:"b" , g23:"b" , g24:"b" , g25:"b" , g26:"b" , g27:"b" , g28:"b"
+         , g29:"b" , g30:"b",
+      /* …add the rest of your grammar answers here … */
+    };
+    
+    /* 2. Compute MCQ score and store */
+    function gradeMCQ(){
+      let correct = 0, total = 0;
+      /* Loop through answer key */
+      Object.entries(ANSWER_KEY).forEach(([name, right])=>{
+        total++;
+        const chosen = document.querySelector(`input[name="${name}"]:checked`);
+        if(chosen && chosen.value === right) correct++;
+      });
+      /* expose for other scripts */
+      window.mcqScore = correct;
+      window.mcqTotal = total;
+    }
+    
+    /* 3. Hook into finishExam()   (call gradeMCQ first) */
+    const originalFinish = window.finishExam;          // keep reference
+    window.finishExam = function(){
+      gradeMCQ();                                      // ← auto‑grade
+      /* optionally console.log(window.mcqScore, "of", window.mcqTotal); */
+      originalFinish();                                // continue normal flow
+    };
+    </script>
+    
+</body>
+</html>
