@@ -1,14 +1,20 @@
-const express = require('express');
-const app = express();
-const port = process.env.PORT || 3000;
+// Use import instead of require
+import express from 'express';
+import path from 'path';
 
-// Serve static files (HTML, CSS, JS)
-app.use(express.static('public')); // put your pages inside a folder called "public"
+const app = express();
+const PORT = process.env.PORT || 3000;
+
+app.use(express.static(path.join(__dirname, 'public')));
 
 app.get('/', (req, res) => {
-  res.sendFile(__dirname + '/public/index.html'); // welcome page
+    res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
-app.listen(port, () => {
-  console.log(`Server is running on port ${port}`);
+app.get('/exam', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'exam.html'));
+});
+
+app.listen(PORT, () => {
+    console.log(`Server is running on port ${PORT}`);
 });
