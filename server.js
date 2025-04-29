@@ -1,9 +1,11 @@
-const express = require('express');
+import express from 'express';
+import path from 'path';  // Correct use of 'import'
+
 const app = express();
 const port = process.env.PORT || 3000;
 
-// Serve static files (if applicable)
-app.use(express.static('public'));  // adjust 'public' to your actual static folder name
+// Serve static files (adjust 'public' to your actual static folder name)
+app.use(express.static('public'));
 
 // Basic route example
 app.get('/', (req, res) => {
