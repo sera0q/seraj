@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Cambright Admin Dashboard</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 0; background: #f0f2f5; }
+    header { background: #2a8cff; color: #fff; padding: 20px; font-size: 20px; }
+    section { padding: 20px; background: #fff; margin-bottom: 10px; }
+    button { background: #2a8cff; color: white; border: none; padding: 8px 14px; border-radius: 4px; cursor: pointer; }
+    button:hover { background: #005fcc; }
+    table { width: 100%; border-collapse: collapse; margin-top: 10px; background: white; }
+    th, td { border: 1px solid #ccc; padding: 8px; text-align: left; font-size: 14px; }
+    th { background: #e0e8ff; }
+    tr:nth-child(even) { background: #f9f9f9; }
+    .modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.6); justify-content: center; align-items: center; }
+    .modal-box { background: white; padding: 20px; border-radius: 8px; width: 90%; max-width: 600px; }
+    textarea { width: 100%; height: 100px; }
+    .close-btn { background: #e53935; }
+    .close-btn:hover { background: #b71c1c; }
+  </style>
+</head>
+<body>
+<header>Teacher / Admin Dashboard</header>
+
+<!-- PIN Generator -->
+<section>
+  <h2>Create 6‑digit Access PIN (valid 30 min)</h2>
+  <button onclick="generatePin()">Generate Code</button>
+  <strong id="pinDisplay" style="margin-left: 12px;"></strong>
+  <span id="pinCountdown" style="margin-left: 12px; color: #e53935;"></span>
+</section>
+
+<!-- Submissions Table -->
+<section>
+  <h2>Submissions</h2>
+  <table>
+    <thead>
+      <tr><th>Name</th><th>Email</th><th>MCQ</th><th>Writing</th><th>Total</th><th>Action</th></tr>
+    </thead>
+    <tbody id="submissionTable"></tbody>
+  </table>
+</section>
+
+<!-- Modal -->
+<div class="modal" id="modal">
+  <div class="modal-box">
+    <h3 id="modalName"></h3>
+    <p>Email: <span id="modalEmail"></span></p>
+    <p>MCQ Score: <span id="modalMcq"></span>/26</p>
+    <h4>Writing Answer:</h4>
+    <textarea id="modalWriting" readonly></textarea>
+    <label>Writing Score (0–20): <input type="number" id="modalScore" min="0" max="20" style="width: 60px;"></label>
+    <br><br>
+    <button onclick="saveScore()">Save</button>
+    <button onclick="printSubmission()">Print / PDF</button>
+    <button onclick="downloadDoc()">Download DOC</button>
+    <button class="close-btn" onclick="closeModal()">Close</button>
+    <p id="saveMessage" style="color: green; display: none;">Saved!</p>
+  </div>
+</div>
+
+<script>
+  let currentId = null;
+
+  // ---------------- PIN GENERATOR ----------------
+  function generatePin() {
+    const pin = String(Math.floor(100000 + Math.random() * 900000));
+    const expires = Date.now() + 30 * 60 * 1000;
+    localStorage.setItem('examPin', JSON.stringify({ pin, expires }));
+
+    document.getElementById("pinDisplay").textContent = "PIN: " + pin;
+    startCountdown();
+  }
+
+  function startCountdown() {
+    clearInterval(window.pinTimer);
+    window.pinTimer = setInterval(() => {
+      const data = JSON.parse(localStorage.getItem("examPin") || "null");
+      const display = document.getElementById("pinCountdown");
+
+      if (!data) { display.textContent = ""; clearInterval(window.pinTimer); return; }
+
+      const diff = data.expires - Date.now();
+      if (diff <= 0) {
+        localStorage.removeItem("examPin");
+        display.textContent = "(expired)";
+        clearInterval(window.pinTimer);
+      } else {
+        const min = Math.floor(diff / 60000);
+        const sec = Math.floor((diff % 60000) / 1000);
+        display.textContent = `(expires in ${String(min).padStart(2, '0')}:${String(sec).padStart(2, '0')})`;
+      }
+    }, 1000);
+  }
+
+  // ---------------- DATA RENDER ----------------
+  const table = document.getElementById("submissionTable");
+  function getSubs() {
+    return JSON.parse(localStorage.getItem("submissions") || "[]");
+  }
+
+  function saveSubs(data) {
+    localStorage.setItem("submissions", JSON.stringify(data));
+  }
+
+  function renderTable() {
+    const subs = getSubs();
+    table.innerHTML = "";
+    subs.forEach(sub => {
+      const total = sub.writingScore != null ? (sub.writingScore + sub.mcqScore) : "—";
+      const writing = sub.writingScore != null ? `${sub.writingScore}/20` : "⏳ not graded";
+      table.innerHTML += `
+        <tr>
+          <td>${sub.name}</td>
+          <td>${sub.email}</td>
+          <td>${sub.mcqScore}/26</td>
+          <td>${writing}</td>
+          <td>${total}</td>
+          <td><button onclick="openModal('${sub.id}')">Open</button></td>
+        </tr>`;
+    });
+  }
+
+  // ---------------- MODAL LOGIC ----------------
+  function openModal(id) {
+    const sub = getSubs().find(s => s.id === id);
+    if (!sub) return;
+    currentId = id;
+
+    document.getElementById("modalName").textContent = sub.name;
+    document.getElementById("modalEmail").textContent = sub.email;
+    document.getElementById("modalMcq").textContent = sub.mcqScore;
+    document.getElementById("modalWriting").value = sub.writingAnswer || "";
+    document.getElementById("modalScore").value = sub.writingScore ?? "";
+    document.getElementById("saveMessage").style.display = "none";
+    document.getElementById("modal").style.display = "flex";
+  }
+
+  function closeModal() {
+    document.getElementById("modal").style.display = "none";
+  }
+
+  function saveScore() {
+    const val = Number(document.getElementById("modalScore").value);
+    if (isNaN(val) || val < 0 || val > 20) {
+      alert("Enter a score from 0 to 20");
+      return;
+    }
+    const subs = getSubs();
+    const sub = subs.find(s => s.id === currentId);
+    if (!sub) return;
+    sub.writingScore = val;
+    saveSubs(subs);
+    renderTable();
+    document.getElementById("saveMessage").style.display = "block";
+  }
+
+  // ---------------- EXPORT LOGIC ----------------
+  function printSubmission() {
+    const w = window.open('', '', 'width=800,height=600');
+    const text = document.getElementById("modalWriting").value;
+    w.document.write(`<pre>${text.replace(/</g, "&lt;")}</pre>`);
+    w.document.close(); w.focus(); w.print(); w.close();
+  }
+
+  function downloadDoc() {
+    const name = document.getElementById("modalName").textContent;
+    const text = document.getElementById("modalWriting").value;
+    const html = `<html><body><pre>${text.replace(/</g, "&lt;")}</pre></body></html>`;
+    const blob = new Blob(['\ufeff', html], { type: 'application/msword' });
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(blob);
+    a.download = `${name.replace(/\s+/g, "_")}_submission.doc`;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+  }
+
+  // ---------------- INITIALIZATION ----------------
+  renderTable();
+  startCountdown();
+
+  // Demo Data (run once)
+  if (!getSubs().length) {
+    saveSubs([
+      { id: "1", name: "Alice Smith", email: "alice@example.com", mcqScore: 20, writingAnswer: "My opinion is...", writingScore: null },
+      { id: "2", name: "John Doe", email: "john@example.com", mcqScore: 24, writingAnswer: "In the future...", writingScore: null }
+    ]);
+    renderTable();
+  }
+</script>
+</body>
+</html>
