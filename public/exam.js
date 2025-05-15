@@ -249,6 +249,17 @@ function submitExam() {
   };
   
   reader.readAsDataURL(videoBlob);
-}
+  localStorage.setItem('submissions', JSON.stringify(subs));
 
-localStorage.setItem('submissions', JSON.stringify(subs));
+}
+const student = {
+  type: "submit",
+  name: "Real Student",
+  email: "student@example.com",
+  passport: "L1234567",
+  pin: "111111",
+  mcqScore: 22,
+  writingAnswer: "Test from real form",
+  videoUrl: ""
+};
+

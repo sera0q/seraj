@@ -1,36 +1,52 @@
-const nameInput = document.getElementById('studentName');
-const emailInput = document.getElementById('studentEmail');
-const passportInput = document.getElementById('studentPassport');
-const pinInput = document.getElementById('pinInput');
-const startBtn = document.getElementById('startBtn');
-const pinError = document.getElementById('pin-error');
+document.addEventListener("DOMContentLoaded", () => {
+  const form = document.getElementById("welcome-form");
+  const pinError = document.getElementById("pin-error");
 
-function validateAll() {
-  const name = nameInput.value.trim();
-  const email = emailInput.value.trim();
-  const passport = passportInput.value.trim();
-  const enteredPin = pinInput.value.trim();
-  const savedPin = localStorage.getItem('examPin');
+  const scriptURL = "https://script.google.com/macros/s/AKfycbyARBQN6BBUixxxG_OHwDL8IDaaE1sPmdSTSqM1b6s3JvcPEmgof9yO17DB6t8vpG_2nA/exec";
 
-  if (name && email && passport && enteredPin === savedPin) {
-    startBtn.disabled = false;
-    pinError.style.display = "none";
-  } else {
-    startBtn.disabled = true;
-    pinError.style.display = "block";
-  }
-}
+  form.addEventListener("submit", async (e) => {
+    e.preventDefault();
 
-// Event listeners
-nameInput.addEventListener('input', validateAll);
-emailInput.addEventListener('input', validateAll);
-passportInput.addEventListener('input', validateAll);
-pinInput.addEventListener('input', validateAll);
+    const name = document.getElementById("studentName").value.trim();
+    const passport = document.getElementById("studentPassport").value.trim();
+    const email = document.getElementById("studentEmail").value.trim();
+    const pin = document.getElementById("pinInput").value.trim();
 
-// On Start button click
-startBtn.addEventListener('click', function () {
-  localStorage.setItem('studentName', nameInput.value.trim());
-  localStorage.setItem('studentEmail', emailInput.value.trim());
-  localStorage.setItem('studentPassport', passportInput.value.trim());
-  window.location.href = "exam.html"; // redirect to the exam
+    try {
+      const res = await fetch(scriptURL);
+      const data = await res.json();
+
+      const isValid = data.some(row => row.pin === pin);
+
+      if (!isValid) {
+        pinError.style.display = "block";
+        return;
+      }
+
+      pinError.style.display = "none";
+
+      const newStudent = {
+        id: Date.now().toString(),
+        name,
+        passport,
+        email,
+        pin,
+        startTime: new Date().toISOString()
+      };
+
+      await fetch(scriptURL, {
+        method: "POST",
+        body: JSON.stringify(newStudent),
+        headers: {
+          "Content-Type": "application/json"
+        }
+      });
+      
+
+      window.location.href = `exam.html?id=${newStudent.id}`;
+
+    } catch (error) {
+      console.error("Something went wrong:", error);
+    }
+  });
 });

@@ -37,7 +37,7 @@
   <h2>Submissions</h2>
   <table>
     <thead>
-      <tr><th>Name</th><th>Email</th><th>MCQ</th><th>Writing</th><th>Total</th><th>Action</th></tr>
+<tr><th>Name</th><th>Email</th><th>Passport</th><th>MCQ</th><th>Writing</th><th>Total</th><th>Action</th><th>Video</th></tr>
     </thead>
     <tbody id="submissionTable"></tbody>
   </table>
@@ -48,6 +48,7 @@
   <div class="modal-box">
     <h3 id="modalName"></h3>
     <p>Email: <span id="modalEmail"></span></p>
+    <p>Passport: <span id="modalPassport"></span></p>
     <p>MCQ Score: <span id="modalMcq"></span>/26</p>
     <h4>Writing Answer:</h4>
     <textarea id="modalWriting" readonly></textarea>
@@ -63,8 +64,8 @@
 
 <script>
   let currentId = null;
+  let countdownInterval;
 
-  // ---------------- PIN GENERATOR ----------------
   function generatePin() {
     const pin = String(Math.floor(100000 + Math.random() * 900000));
     const expires = Date.now() + 30 * 60 * 1000;
@@ -72,124 +73,47 @@
 
     document.getElementById("pinDisplay").textContent = "PIN: " + pin;
     startCountdown();
+
+    fetch('https://script.google.com/macros/s/AKfycbzu6dlq_9Mez5Rcli02ulyR8mVdFLvxdU-SCgEDlleSPqOd3_W9IZEG6Gb5IhbB7xIXfA/exec', {
+      method: 'POST',
+      body: JSON.stringify({ pin, expires }),
+      headers: { 'Content-Type': 'application/json' }
+    })
+    .then(res => res.text())
+    .then(data => console.log("Sheet response:", data))
+    .catch(err => console.error("Failed to send to Sheets:", err));
   }
 
   function startCountdown() {
-    clearInterval(window.pinTimer);
-    window.pinTimer = setInterval(() => {
-      const data = JSON.parse(localStorage.getItem("examPin") || "null");
-      const display = document.getElementById("pinCountdown");
+    clearInterval(countdownInterval);
+    const pinData = JSON.parse(localStorage.getItem('examPin'));
+    if (!pinData) return;
 
-      if (!data) { display.textContent = ""; clearInterval(window.pinTimer); return; }
+    countdownInterval = setInterval(() => {
+      const now = Date.now();
+      const diff = pinData.expires - now;
 
-      const diff = data.expires - Date.now();
       if (diff <= 0) {
-        localStorage.removeItem("examPin");
-        display.textContent = "(expired)";
-        clearInterval(window.pinTimer);
-      } else {
-        const min = Math.floor(diff / 60000);
-        const sec = Math.floor((diff % 60000) / 1000);
-        display.textContent = `(expires in ${String(min).padStart(2, '0')}:${String(sec).padStart(2, '0')})`;
+        document.getElementById("pinCountdown").textContent = "Expired";
+        clearInterval(countdownInterval);
+        return;
       }
+
+      const minutes = Math.floor(diff / 60000);
+      const seconds = Math.floor((diff % 60000) / 1000);
+      document.getElementById("pinCountdown").textContent = `${minutes}:${seconds.toString().padStart(2, '0')} remaining`;
     }, 1000);
   }
 
-  // ---------------- DATA RENDER ----------------
-  const table = document.getElementById("submissionTable");
-  function getSubs() {
-    return JSON.parse(localStorage.getItem("submissions") || "[]");
-  }
-
-  function saveSubs(data) {
-    localStorage.setItem("submissions", JSON.stringify(data));
-  }
-
-  function renderTable() {
-    const subs = getSubs();
-    table.innerHTML = "";
-    subs.forEach(sub => {
-      const total = sub.writingScore != null ? (sub.writingScore + sub.mcqScore) : "—";
-      const writing = sub.writingScore != null ? `${sub.writingScore}/20` : "⏳ not graded";
-      table.innerHTML += `
-        <tr>
-          <td>${sub.name}</td>
-          <td>${sub.email}</td>
-          <td>${sub.mcqScore}/26</td>
-          <td>${writing}</td>
-          <td>${total}</td>
-          <td><button onclick="openModal('${sub.id}')">Open</button></td>
-        </tr>`;
-    });
-  }
-
-  // ---------------- MODAL LOGIC ----------------
-  function openModal(id) {
-    const sub = getSubs().find(s => s.id === id);
-    if (!sub) return;
-    currentId = id;
-
-    document.getElementById("modalName").textContent = sub.name;
-    document.getElementById("modalEmail").textContent = sub.email;
-    document.getElementById("modalMcq").textContent = sub.mcqScore;
-    document.getElementById("modalWriting").value = sub.writingAnswer || "";
-    document.getElementById("modalScore").value = sub.writingScore ?? "";
-    document.getElementById("saveMessage").style.display = "none";
-    document.getElementById("modal").style.display = "flex";
-  }
-
-  function closeModal() {
-    document.getElementById("modal").style.display = "none";
-  }
-
-  function saveScore() {
-    const val = Number(document.getElementById("modalScore").value);
-    if (isNaN(val) || val < 0 || val > 20) {
-      alert("Enter a score from 0 to 20");
-      return;
+  window.onload = () => {
+    const pin = localStorage.getItem('examPin');
+    if (pin) {
+      const { pin: code } = JSON.parse(pin);
+      document.getElementById("pinDisplay").textContent = "PIN: " + code;
+      startCountdown();
     }
-    const subs = getSubs();
-    const sub = subs.find(s => s.id === currentId);
-    if (!sub) return;
-    sub.writingScore = val;
-    saveSubs(subs);
-    renderTable();
-    document.getElementById("saveMessage").style.display = "block";
-  }
-
-  // ---------------- EXPORT LOGIC ----------------
-  function printSubmission() {
-    const w = window.open('', '', 'width=800,height=600');
-    const text = document.getElementById("modalWriting").value;
-    w.document.write(`<pre>${text.replace(/</g, "&lt;")}</pre>`);
-    w.document.close(); w.focus(); w.print(); w.close();
-  }
-
-  function downloadDoc() {
-    const name = document.getElementById("modalName").textContent;
-    const text = document.getElementById("modalWriting").value;
-    const html = `<html><body><pre>${text.replace(/</g, "&lt;")}</pre></body></html>`;
-    const blob = new Blob(['\ufeff', html], { type: 'application/msword' });
-    const a = document.createElement("a");
-    a.href = URL.createObjectURL(blob);
-    a.download = `${name.replace(/\s+/g, "_")}_submission.doc`;
-    document.body.appendChild(a);
-    a.click();
-    a.remove();
-  }
-
-  // ---------------- INITIALIZATION ----------------
-  renderTable();
-  startCountdown();
-
-  // Demo Data (run once)
-  if (!getSubs().length) {
-    saveSubs([
-      { id: "1", name: "Alice Smith", email: "alice@example.com", mcqScore: 20, writingAnswer: "My opinion is...", writingScore: null },
-      { id: "2", name: "John Doe", email: "john@example.com", mcqScore: 24, writingAnswer: "In the future...", writingScore: null }
-    ]);
-    renderTable();
-  }
+    fetchSubsFromSheets();
+  };
 </script>
 </body>
 </html>

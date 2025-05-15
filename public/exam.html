@@ -1,6 +1,8 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+
+  
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
 <title>Cambright Placement Test</title>
@@ -732,6 +734,60 @@ updateGrammarView();   // initialise
       /* optionally console.log(window.mcqScore, "of", window.mcqTotal); */
       originalFinish();                                // continue normal flow
     };
+    </script>
+    <script>
+
+      // Exam page: after Finish Exam
+function finishExam() {
+  resetTimer();
+
+  const BASE_URL = "https://cambright-placement-test.onrender.com";
+
+// Load student info
+const name = sessionStorage.getItem("name");
+const passport = sessionStorage.getItem("passport");
+const email = sessionStorage.getItem("email");
+const code = sessionStorage.getItem("code");
+
+// Submit exam
+document.getElementById("submitExam").addEventListener("click", async () => {
+  const mcqScore = calculateMCQScore(); // Replace with your real score logic
+  const writingAnswer = document.getElementById("writingAnswer").value;
+  const videoBlob = recordedVideoBlob; // Assuming you've already captured it
+
+  if (!videoBlob) {
+    return alert("Please record your speaking video.");
+  }
+
+  const formData = new FormData();
+  formData.append("name", name);
+  formData.append("passport", passport);
+  formData.append("email", email);
+  formData.append("code", code);
+  formData.append("mcq_score", mcqScore);
+  formData.append("writing_answer", writingAnswer);
+  formData.append("video", new File([videoBlob], "recording.webm"));
+
+  try {
+    const res = await fetch(`${BASE_URL}/submit`, {
+      method: "POST",
+      body: formData
+    });
+
+    const result = await res.json();
+
+    if (res.ok) {
+      alert("Exam submitted successfully!");
+      window.location.href = "end.html";
+    } else {
+      alert(result.message || "Submission failed.");
+    }
+  } catch (err) {
+    alert("Error submitting exam.");
+    console.error(err);
+  }
+});
+
     </script>
     
 </body>
