@@ -2,7 +2,7 @@
   "name": "placement-test",
   "private": true,
   "version": "0.0.0",
-  "type": "module",
+  "type": "commonjs",
   "scripts": {
     "dev": "vite",
     "build": "vite build",
@@ -11,7 +11,37 @@
   "devDependencies": {
     "vite": "^6.3.1"
   },
+  "main": "app.js",
   "dependencies": {
-    "express": "^5.1.0"
-  }
+    "body-parser": "^2.2.0",
+    "cloudinary": "^2.6.1",
+    "cors": "^2.8.5",
+    "dotenv": "^16.5.0",
+    "esbuild": "^0.25.3",
+    "express": "^5.1.0",
+    "fdir": "^6.4.4",
+    "firebase": "^11.7.1",
+    "multer": "^1.4.5-lts.2",
+    "nanoid": "^3.3.11",
+    "pg": "^8.16.0",
+    "picocolors": "^1.1.1",
+    "picomatch": "^4.0.2",
+    "postcss": "^8.5.3",
+    "rollup": "^4.40.1",
+    "source-map-js": "^1.2.1",
+    "tinyglobby": "^0.2.13",
+    "uuid": "^11.1.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/sera0q/seraj.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/sera0q/seraj/issues"
+  },
+  "homepage": "https://github.com/sera0q/seraj#readme",
+  "description": ""
 }
