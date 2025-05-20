@@ -551,11 +551,13 @@ Speak for 2 minutes about yourself and answer these questions:<br>
 
   
   <!-- Navigation buttons -->
-  <div class="navigation" style="margin-top:20px; gap:10px">
-    <button id="startBtn" onclick="startRec()">🎥 Start</button>
-    <button id="stopBtn" onclick="stopRecording()" disabled>⏹ Stop</button>
-    <button id="redoBtn" onclick="redoRecording()" disabled>🔄 Re‑record</button>
-  </div>
+<!-- ✅ FIXED Navigation buttons -->
+<div class="navigation" style="margin-top:20px; gap:10px">
+  <button id="startBtn" onclick="startRecording()">🎥 Start</button>
+  <button id="stopBtn" onclick="stopRecording()" disabled>⏹ Stop</button>
+  <button id="redoBtn" onclick="redoRecording()" disabled>🔄 Re‑record</button>
+</div>
+
 
   <div class="navigation" style="margin-top:30px">
     <button onclick="goToWriting()">◀ Previous</button>
@@ -804,5 +806,7 @@ async function finishExam() {
 }
 
     </script>
+
+    
 </body>
 </html>

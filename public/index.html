@@ -75,10 +75,23 @@ document.getElementById("startBtn").addEventListener("click", async () => {
     }
 
     // Store in sessionStorage for use in exam page
-    sessionStorage.setItem("name", name);
-    sessionStorage.setItem("passport", passport);
-    sessionStorage.setItem("email", email);
-    sessionStorage.setItem("code", code);
+   // Create a new student document in Firestore
+const studentRef = await db.collection("students").add({
+  name,
+  passport,
+  email,
+  pin: code,
+  startTime: firebase.firestore.Timestamp.now()
+});
+
+// Save student ID to localStorage (required for exam.html)
+localStorage.setItem("studentId", studentRef.id);
+
+// You can still save name/passport/email if needed:
+localStorage.setItem("currentStudent", JSON.stringify({ name, passport, email }));
+
+// Redirect to exam
+window.location.href = "exam.html";
 
     // Redirect to exam page
     window.location.href = "exam.html";

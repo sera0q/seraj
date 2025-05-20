@@ -202,3 +202,4 @@ function submitExam() {
   const subs = JSON.parse(localStorage.getItem('submissions') || '[]');
   localStorage.setItem('submissions', JSON.stringify(subs));
 }
+
