@@ -2,6 +2,25 @@
 <html lang="en">
   
 <head>
+
+<!-- Firebase SDKs -->
+<script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-firestore-compat.js"></script>
+
+<script>
+  // Your Firebase config — replace with your own from Firebase Console
+  const firebaseConfig = {
+    apiKey: "AIzaSyDEq-mHxMtGW1LxSSqDDssVB_o0kBk3v3g",
+    authDomain: "final-project-f5605.firebaseapp.com",
+    projectId: "final-project-f5605", 
+    // ... other config fields if needed
+  };
+  // Initialize Firebase
+  firebase.initializeApp(firebaseConfig);
+  const db = firebase.firestore();
+</script>
+
+
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Cambright Placement Test</title>

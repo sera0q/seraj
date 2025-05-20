@@ -1,6 +1,73 @@
 <!DOCTYPE html>
 <html lang="en">
+  
 <head>
+
+  <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-firestore-compat.js"></script>
+<script>
+  function closeModal() {
+  document.getElementById("modal").style.display = "none";
+  document.getElementById("saveMessage").style.display = "none"; // hide "Saved!" message
+}
+
+function printSubmission() {
+  const name = document.getElementById("modalName").textContent;
+  const email = document.getElementById("modalEmail").textContent;
+  const passport = document.getElementById("modalPassport").textContent;
+  const mcq = document.getElementById("modalMcq").textContent;
+  const writing = document.getElementById("modalWriting").value;
+  const score = document.getElementById("modalScore").value;
+
+  const win = window.open('', '', 'height=700,width=700');
+  win.document.write(`<h2>${name} - Exam Report</h2>`);
+  win.document.write(`<p><strong>Email:</strong> ${email}<br>`);
+  win.document.write(`<strong>Passport:</strong> ${passport}<br>`);
+  win.document.write(`<strong>MCQ Score:</strong> ${mcq}/26<br>`);
+  win.document.write(`<strong>Writing Score:</strong> ${score}/20</p>`);
+  win.document.write(`<h3>Writing Answer</h3><pre>${writing}</pre>`);
+  win.document.close();
+  win.print();
+}
+function downloadDoc() {
+  const name = document.getElementById("modalName").textContent;
+  const email = document.getElementById("modalEmail").textContent;
+  const passport = document.getElementById("modalPassport").textContent;
+  const mcq = document.getElementById("modalMcq").textContent;
+  const writing = document.getElementById("modalWriting").value;
+  const score = document.getElementById("modalScore").value;
+
+  const content = `
+    <h2>${name} - Exam Report</h2>
+    <p><strong>Email:</strong> ${email}<br>
+    <strong>Passport:</strong> ${passport}<br>
+    <strong>MCQ Score:</strong> ${mcq}/26<br>
+    <strong>Writing Score:</strong> ${score}/20</p>
+    <h3>Writing Answer</h3>
+    <pre>${writing}</pre>
+  `;
+
+  const blob = new Blob([content], { type: "application/msword" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = `${name.replace(/\s+/g, '_')}_Exam.doc`;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+}
+
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyDEq-mHxMtGW1LxSSqDDssVB_o0kBk3v3g",
+    authDomain: "final-project-f5605.firebaseapp.com",
+    projectId: "final-project-f5605", 
+   };
+  firebase.initializeApp(firebaseConfig);
+  const db = firebase.firestore();
+  </script>
+
+
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Cambright Admin Dashboard</title>
@@ -66,23 +133,17 @@
   let currentId = null;
   let countdownInterval;
 
-  function generatePin() {
-    const pin = String(Math.floor(100000 + Math.random() * 900000));
-    const expires = Date.now() + 30 * 60 * 1000;
-    localStorage.setItem('examPin', JSON.stringify({ pin, expires }));
 
-    document.getElementById("pinDisplay").textContent = "PIN: " + pin;
-    startCountdown();
+  
+    async function fetchSubsFromFirestore() {
+  const snapshot = await db.collection("students").get();
+  const subs = [];
+  snapshot.forEach(doc => {
+    subs.push({ id: doc.id, ...doc.data() });
+  });
+  renderTable(subs);
+}
 
-    fetch('https://script.google.com/macros/s/AKfycbzu6dlq_9Mez5Rcli02ulyR8mVdFLvxdU-SCgEDlleSPqOd3_W9IZEG6Gb5IhbB7xIXfA/exec', {
-      method: 'POST',
-      body: JSON.stringify({ pin, expires }),
-      headers: { 'Content-Type': 'application/json' }
-    })
-    .then(res => res.text())
-    .then(data => console.log("Sheet response:", data))
-    .catch(err => console.error("Failed to send to Sheets:", err));
-  }
 
   function startCountdown() {
     clearInterval(countdownInterval);
@@ -104,16 +165,114 @@
       document.getElementById("pinCountdown").textContent = `${minutes}:${seconds.toString().padStart(2, '0')} remaining`;
     }, 1000);
   }
+  async function viewVideo(subId) {
+  const doc = await db.collection("students").doc(subId).get();
+  if (!doc.exists) {
+    alert("Submission not found.");
+    return;
+  }
+  const sub = doc.data();
+  if (sub.videoUrl) {
+    window.open(sub.videoUrl, '_blank');
+  } else {
+    alert("No video available for this submission.");
+  }
+}
 
-  window.onload = () => {
-    const pin = localStorage.getItem('examPin');
-    if (pin) {
-      const { pin: code } = JSON.parse(pin);
-      document.getElementById("pinDisplay").textContent = "PIN: " + code;
-      startCountdown();
-    }
-    fetchSubsFromSheets();
-  };
+function renderTable(subs) {
+  const table = document.getElementById("submissionTable");
+  table.innerHTML = "";
+  if (subs.length === 0) {
+  table.innerHTML = `<tr><td colspan="8">No submissions found.</td></tr>`;
+  return;
+}
+
+subs.forEach(sub => {
+  const total = (typeof sub.mcqScore === 'number' && typeof sub.writingScore === 'number')
+    ? (sub.mcqScore + sub.writingScore)
+    : "—";
+
+  const writing = sub.writingScore != null ? `${sub.writingScore}/20` : "not graded";
+
+  table.innerHTML += `
+    <tr>
+      <td>${sub.name || ""}</td>
+      <td>${sub.email || ""}</td>
+      <td>${sub.passport || ""}</td>
+      <td>${sub.mcqScore || 0}/26</td>
+      <td>${writing}</td>
+      <td>${total}</td>
+
+      <td><button onclick="openModal('${sub.id}')">Open</button></td>
+      <td><button onclick="viewVideo('${sub.id}')">View Video</button></td>
+    </tr>`;
+});
+
+
+  localStorage.setItem("submissions", JSON.stringify(subs)); // optional local cache
+
+}
+async function saveScore() {
+  const val = Number(document.getElementById("modalScore").value);
+  if (isNaN(val) || val < 0 || val > 20) {
+    alert("Enter a valid score (0–20)");
+    return;
+  }
+
+  await db.collection("students").doc(currentId).update({
+    writingScore: val
+  });
+
+  document.getElementById("saveMessage").style.display = "block";
+  closeModal();
+}
+async function openModal(id) {
+  currentId = id;
+  const doc = await db.collection("students").doc(id).get();
+  if (!doc.exists) return;
+
+  const sub = doc.data();
+  document.getElementById("modalName").textContent = sub.name || "";
+  document.getElementById("modalEmail").textContent = sub.email || "";
+  document.getElementById("modalPassport").textContent = sub.passport || "";
+  document.getElementById("modalMcq").textContent = sub.mcqScore || 0;
+  document.getElementById("modalWriting").value = sub.writingAnswer || "";
+  document.getElementById("modalScore").value = sub.writingScore ?? "";
+  document.getElementById("modal").style.display = "flex";
+}
+
+
+// No PIN creation here — just load submissions
+window.onload = () => {
+  const saved = localStorage.getItem('examPin');
+  if (saved) {
+    const { pin } = JSON.parse(saved);
+    document.getElementById("pinDisplay").textContent = "PIN: " + pin;
+    startCountdown();
+  }
+
+  fetchSubsFromFirestore();
+};
+  
+    async function generatePin() {
+  const pin = String(Math.floor(100000 + Math.random() * 900000)); // Random 6-digit
+  const expiresAt = new Date(Date.now() + 30 * 60 * 1000); // 30 minutes
+
+  try {
+    await db.collection("accessPins").doc(pin).set({
+      expiresAt: firebase.firestore.Timestamp.fromDate(expiresAt)
+    });
+
+    localStorage.setItem("examPin", JSON.stringify({ pin, expires: expiresAt.getTime() }));
+
+    document.getElementById("pinDisplay").textContent = "PIN: " + pin;
+    startCountdown();
+  } catch (error) {
+    console.error("Error saving PIN to Firestore:", error);
+    alert("Failed to generate PIN.");
+  }
+}
+
 </script>
 </body>
 </html>

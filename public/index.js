@@ -2,51 +2,67 @@ document.addEventListener("DOMContentLoaded", () => {
   const form = document.getElementById("welcome-form");
   const pinError = document.getElementById("pin-error");
 
-  const scriptURL = "https://script.google.com/macros/s/AKfycbyARBQN6BBUixxxG_OHwDL8IDaaE1sPmdSTSqM1b6s3JvcPEmgof9yO17DB6t8vpG_2nA/exec";
-
   form.addEventListener("submit", async (e) => {
     e.preventDefault();
 
+    // Get input values
     const name = document.getElementById("studentName").value.trim();
     const passport = document.getElementById("studentPassport").value.trim();
     const email = document.getElementById("studentEmail").value.trim();
-    const pin = document.getElementById("pinInput").value.trim();
+    const code = document.getElementById("pinInput").value.trim();
+    
+
+    // Simple validation
+    if (!name || !passport || !email || !code) {
+      alert("Please fill in all fields.");
+      return;
+    }
 
     try {
-      const res = await fetch(scriptURL);
-      const data = await res.json();
+      // Validate PIN from Firestore
+      const pinDoc = await db.collection("accessPins").doc(code).get();
 
-      const isValid = data.some(row => row.pin === pin);
-
-      if (!isValid) {
+      if (!pinDoc.exists) {
         pinError.style.display = "block";
+        pinError.textContent = "Invalid PIN.";
         return;
       }
 
+      const pinData = pinDoc.data();
+      const now = new Date();
+
+      if (pinData.expiresAt.toDate() < now) {
+        pinError.style.display = "block";
+        pinError.textContent = "PIN has expired.";
+        return;
+      }
+
+      // Hide PIN error if valid
       pinError.style.display = "none";
 
-      const newStudent = {
-        id: Date.now().toString(),
-        name,
-        passport,
-        email,
-        pin,
-        startTime: new Date().toISOString()
-      };
+// Save student info to Firestore
+const newStudentRef = db.collection("students").doc(); // generate new doc with ID
+await newStudentRef.set({
+  name,
+  passport,
+  email,
+  pin: code,
+  startTime: firebase.firestore.Timestamp.now()
+});
 
-      await fetch(scriptURL, {
-        method: "POST",
-        body: JSON.stringify(newStudent),
-        headers: {
-          "Content-Type": "application/json"
-        }
-      });
-      
+// Save the student ID locally for use in the exam page
+localStorage.setItem("studentId", newStudentRef.id);
 
-      window.location.href = `exam.html?id=${newStudent.id}`;
+// Redirect to exam page
+window.location.href = "exam.html";
+
+
+      // Redirect to exam page with student ID in URL
+      window.location.href = `exam.html?id=${newStudentRef.id}`;
 
     } catch (error) {
-      console.error("Something went wrong:", error);
+      console.error("Error validating PIN or saving student:", error);
+      alert("An error occurred. Please try again later.");
     }
   });
 });

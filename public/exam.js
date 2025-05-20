@@ -1,6 +1,6 @@
 /*****  GLOBAL TIMER  *****/
 let timer = null;
-let timeRemaining = 50 * 60;            // 50 minutes in seconds
+let timeRemaining = 50 * 60; // 50 minutes in seconds
 
 function formatTime(sec) {
   const m = String(Math.floor(sec / 60)).padStart(2, "0");
@@ -9,8 +9,7 @@ function formatTime(sec) {
 }
 
 function startTimer() {
-  // ensure we never create two timers
-  if (timer) return;
+  if (timer) return; // prevent multiple timers
   timer = setInterval(() => {
     timeRemaining--;
     document.getElementById("timer").textContent = `⏳ ${formatTime(timeRemaining)}`;
@@ -30,160 +29,119 @@ function resetTimer() {
 }
 
 function show(id) {
-  // 1. Hide all sections first
-  document.querySelectorAll('.section').forEach(section => {
-    section.classList.add('hidden');
-  });
-
-  // 2. Show the targeted section
+  document.querySelectorAll('.section').forEach(section => section.classList.add('hidden'));
   const section = document.getElementById(id);
-  section.classList.remove('hidden');
+  if (section) section.classList.remove('hidden');
 
-  // 3. Scroll to the top (depending where your sections live)
+  // Scroll top for UX
   const container = document.getElementById('all-content');
-  if (container) {
-    container.scrollTo({ top: 0, behavior: 'smooth' });
-  } else {
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-  }
+  if (container) container.scrollTo({ top: 0, behavior: 'smooth' });
+  else window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
-
-
-/*****  BUTTON HANDLERS  *****/
+/***** BUTTON HANDLERS *****/
 function startReading(){
-  enableExamLock();          // <-- add this line
+  enableExamLock(); // Fullscreen lock
   show("reading-section");
   startTimer();
 }
 
-
-
 function backToIntro() {
-  show("instructions-box");
+  show("intro-section"); // fixed from instructions-box to intro-section
   resetTimer();
 }
 
 function goToGrammar()   { show("grammar-section"); }
 function goToReading()   { show("reading-section"); }
 function goToWriting()   { show("writing-section"); }
-function goToVideo()     { show("video-section");   }
+function goToVideo()     { show("video-section"); }
 
-function finishExam() {
-  // Show a message to the user on the page instead of using alert
+async function finishExam() {
+  gradeMCQ(); // grade before finishing
+
+  // Get answers now to capture user input at finish time
+  const writingAns = document.querySelector('textarea')?.value || '';
+
+  // Save submission locally
+  const subs = JSON.parse(localStorage.getItem('submissions') || '[]');
+  subs.push({
+    id: Date.now().toString(36),
+    ...(JSON.parse(localStorage.getItem('currentStudent') || '{}')),
+    mcqScore: window.mcqScore || 0,
+    writingAnswer: writingAns,
+    writingScore: null,  // to be graded later by teacher
+    videoUrl: null       // will update when upload is done
+  });
+  localStorage.setItem('submissions', JSON.stringify(subs));
+
+  // Show thank you message
   const messageDiv = document.createElement('div');
   messageDiv.textContent = "Thank you for completing the test! You will be redirected shortly.";
   messageDiv.style.fontSize = "20px";
   messageDiv.style.textAlign = "center";
   messageDiv.style.marginTop = "20px";
-  document.body.appendChild(messageDiv);  // Or append it to a specific section of your page
+  document.body.appendChild(messageDiv);
 
-  // Reset the timer
   resetTimer();
 
-  // Redirect to the end page after a short delay (2 seconds)
+  // Redirect after 2 seconds
   setTimeout(() => {
-    window.location.href = "end.html";  // Adjust the path if needed
-  }, 2000);  // 2000ms = 2 seconds
+    window.location.href = "end.html";
+  }, 2000);
 }
 
-
-/*  ----  expose handlers to HTML  ----
-    If you declared the functions AFTER <script src="main.js">,
-    the browser already sees them. No further work needed.     */
-
-    // exam.js
-const subs  = JSON.parse(localStorage.getItem('submissions') || '[]');
-
-/* when exam is finished */
-const subs = JSON.parse(localStorage.getItem('submissions') || '[]');
-
-subs.push({
-  id            : Date.now().toString(36),
-  ...(JSON.parse(localStorage.getItem('currentStudent') || '{}')),
-  mcqScore      : window.mcqScore || 0,     // auto‑graded score
-  writingAnswer : writingAns      || '',    // the textarea text
-  writingScore  : null,                     // teacher will grade later
-  videoUrl      : null                      // fill when you upload
-});
-
-
-function submitExam(){
-  if (!videoBlob) {
-    alert("Please record your video before submitting.");
-    return;
-  }
-
-  const reader = new FileReader();
-  reader.onloadend = function() {
-    const base64Video = reader.result; // <- This is the video in Base64 string
-
-    const examData = {
-      name: document.getElementById('name').value,
-      email: document.getElementById('email').value,
-      answers: "Student answers here...",  // whatever you already collect
-      video: base64Video
-    };
-
-    // Now send `examData` to your server/database
-    fetch('/submit-exam', {
-      method: 'POST',
-      headers: {'Content-Type': 'application/json'},
-      body: JSON.stringify(examData)
-    })
-    .then(res => res.json())
-    .then(data => {
-      alert("Exam submitted successfully!");
-      // Redirect or thank you page
-    })
-    .catch(err => {
-      console.error(err);
-      alert("Failed to submit exam.");
-    });
+/***** MCQ GRADING FUNCTION (example) *****/
+function gradeMCQ() {
+  // This should calculate score based on your MCQ input
+  // Replace with your actual logic if different
+  const ANSWER_KEY = {
+    q1: "a", q2: "b", /* etc. your key */
   };
-  reader.readAsDataURL(videoBlob);
+
+  let correct = 0, total = 0;
+  Object.entries(ANSWER_KEY).forEach(([name, right]) => {
+    total++;
+    const chosen = document.querySelector(`input[name="${name}"]:checked`);
+    if (chosen && chosen.value === right) correct++;
+  });
+  window.mcqScore = correct;
+  window.mcqTotal = total;
 }
-/*****  VIDEO RECORDING  *****/
+
+/***** VIDEO RECORDING *****/
 let mediaStream = null;
 let mediaRecorder = null;
 let chunks = [];
 let videoBlob = null;
 
-// Initialize camera
 async function initCamera() {
-  if (mediaStream) return;  // Prevent re-requesting if already granted
+  if (mediaStream) return;
   try {
     mediaStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
     document.getElementById('preview').srcObject = mediaStream;
-  } catch (e) {
+  } catch {
     alert('Webcam/microphone access denied.');
   }
 }
 
-// Start recording
 function startRecording() {
   initCamera().then(() => {
     chunks = [];
     mediaRecorder = new MediaRecorder(mediaStream, { mimeType: 'video/webm;codecs=vp9,opus' });
-
     mediaRecorder.ondataavailable = e => chunks.push(e.data);
     mediaRecorder.onstop = handleRecordingStop;
-    
     mediaRecorder.start();
 
-    // UI updates
     startBtn.disabled = true;
     stopBtn.disabled = false;
     redoBtn.disabled = true;
 
-    // Auto-stop after 1 minute
     setTimeout(() => {
       if (mediaRecorder?.state === 'recording') stopRecording();
     }, 60000);
   });
 }
 
-// Stop recording
 function stopRecording() {
   if (mediaRecorder?.state === 'recording') {
     mediaRecorder.stop();
@@ -191,19 +149,14 @@ function stopRecording() {
   }
 }
 
-// Handle stop event
 function handleRecordingStop() {
   videoBlob = new Blob(chunks, { type: 'video/webm' });
-
-  // Preview playback
   const playback = document.getElementById('playback');
   playback.src = URL.createObjectURL(videoBlob);
   playback.classList.remove('hidden');
-
-  redoBtn.disabled = false; // Allow re-recording
+  redoBtn.disabled = false;
 }
 
-// Redo recording
 function redoRecording() {
   const playback = document.getElementById('playback');
   playback.classList.add('hidden');
@@ -214,7 +167,7 @@ function redoRecording() {
   redoBtn.disabled = true;
 }
 
-// Submit video (along with exam data)
+/***** SUBMIT EXAM (optional if using server) *****/
 function submitExam() {
   if (!videoBlob) {
     alert("Please record your video before submitting.");
@@ -223,12 +176,11 @@ function submitExam() {
 
   const reader = new FileReader();
   reader.onloadend = function() {
-    const base64Video = reader.result; // Video as Base64 string
-
+    const base64Video = reader.result;
     const examData = {
-      name: document.getElementById('name').value,
-      email: document.getElementById('email').value,
-      answers: "Student answers here...",  // You can customize this
+      name: document.getElementById('name')?.value || '',
+      email: document.getElementById('email')?.value || '',
+      answers: "Student answers here...", // customize with real answers
       video: base64Video
     };
 
@@ -238,28 +190,15 @@ function submitExam() {
       body: JSON.stringify(examData)
     })
     .then(res => res.json())
-    .then(data => {
+    .then(() => {
       alert("Exam submitted successfully!");
-      window.location.href = "end.html";  // Redirect after success
+      window.location.href = "end.html";
     })
-    .catch(err => {
-      console.error(err);
-      alert("Failed to submit exam.");
-    });
+    .catch(() => alert("Failed to submit exam."));
   };
-  
+
   reader.readAsDataURL(videoBlob);
+  // Also save locally
+  const subs = JSON.parse(localStorage.getItem('submissions') || '[]');
   localStorage.setItem('submissions', JSON.stringify(subs));
-
 }
-const student = {
-  type: "submit",
-  name: "Real Student",
-  email: "student@example.com",
-  passport: "L1234567",
-  pin: "111111",
-  mcqScore: 22,
-  writingAnswer: "Test from real form",
-  videoUrl: ""
-};
-
