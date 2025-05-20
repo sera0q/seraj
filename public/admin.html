@@ -2,6 +2,7 @@
 <html lang="en">
   
 <head>
+  <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-storage-compat.js"></script>
 
   <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-firestore-compat.js"></script>
@@ -204,6 +205,7 @@ subs.forEach(sub => {
       <td>${total}</td>
 
       <td><button onclick="openModal('${sub.id}')">Open</button></td>
+            <button onclick="deleteSubmission('${sub.id}')">Delete</button>
       <td><button onclick="viewVideo('${sub.id}')">View Video</button></td>
     </tr>`;
 });
@@ -272,6 +274,32 @@ window.onload = () => {
     alert("Failed to generate PIN.");
   }
 }
+
+async function deleteSubmission(id) {
+  if (!confirm("Are you sure you want to delete this submission?")) return;
+
+  try {
+    // Optionally delete video from Firebase Storage if needed
+    const doc = await db.collection("students").doc(id).get();
+    const data = doc.data();
+    if (data.videoUrl) {
+      // Delete from Firebase Storage
+      const storageRef = firebase.storage().refFromURL(data.videoUrl);
+      await storageRef.delete();
+    }
+
+    // Delete Firestore document
+    await db.collection("students").doc(id).delete();
+
+    alert("Submission deleted.");
+    fetchSubsFromFirestore(); // Refresh the table
+  } catch (err) {
+    console.error("Error deleting submission:", err);
+    alert("Failed to delete submission.");
+  }
+}
+const storage = firebase.storage();
+
 
 </script>
 </body>

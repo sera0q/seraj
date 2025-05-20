@@ -109,6 +109,12 @@ function gradeMCQ() {
 }
 
 /***** VIDEO RECORDING *****/
+const startBtn = document.getElementById('startBtn');
+const stopBtn = document.getElementById('stopBtn');
+const redoBtn = document.getElementById('redoBtn');
+const playback = document.getElementById('playback');
+
+
 let mediaStream = null;
 let mediaRecorder = null;
 let chunks = [];
@@ -168,38 +174,51 @@ function redoRecording() {
 }
 
 /***** SUBMIT EXAM (optional if using server) *****/
-function submitExam() {
-  if (!videoBlob) {
-    alert("Please record your video before submitting.");
+async function finishExam() {
+  gradeMCQ(); // score MCQs
+
+  const writingAns = document.querySelector('textarea')?.value || '';
+  const studentId = localStorage.getItem("studentId");
+
+  if (!studentId) {
+    alert("Student ID not found.");
     return;
   }
 
-  const reader = new FileReader();
-  reader.onloadend = function() {
-    const base64Video = reader.result;
-    const examData = {
-      name: document.getElementById('name')?.value || '',
-      email: document.getElementById('email')?.value || '',
-      answers: "Student answers here...", // customize with real answers
-      video: base64Video
-    };
+  let videoUrl = null;
 
-    fetch('/submit-exam', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(examData)
-    })
-    .then(res => res.json())
-    .then(() => {
-      alert("Exam submitted successfully!");
-      window.location.href = "end.html";
-    })
-    .catch(() => alert("Failed to submit exam."));
-  };
+  if (videoBlob) {
+    // Upload to Cloudinary
+    const formData = new FormData();
+    formData.append("file", videoBlob);
+    formData.append("upload_preset", "exam_videos");
+    formData.append("cloud_name", "dihabha4b");
 
-  reader.readAsDataURL(videoBlob);
-  // Also save locally
-  const subs = JSON.parse(localStorage.getItem('submissions') || '[]');
-  localStorage.setItem('submissions', JSON.stringify(subs));
+    try {
+      const res = await fetch("https://api.cloudinary.com/v1_1/dihabha4b/video/upload", {
+        method: "POST",
+        body: formData
+      });
+      const data = await res.json();
+      videoUrl = data.secure_url;
+    } catch (err) {
+      alert("Video upload failed.");
+      console.error(err);
+      return; // Stop if upload fails
+    }
+  }
+
+  // Save to Firestore
+  await db.collection("students").doc(studentId).set({
+    mcqScore: window.mcqScore || 0,
+    writingAnswer: writingAns,
+    videoUrl,
+    submittedAt: firebase.firestore.Timestamp.now()
+  }, { merge: true });
+
+  alert("Exam submitted successfully!");
+  window.location.href = "end.html";
 }
+
+
 
