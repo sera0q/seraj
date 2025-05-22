@@ -1,6 +1,6 @@
+/*****  GLOBAL TIMER  *****/
 let timer = null;
-let timeRemaining = 50 * 60;
-let mediaStream = null, mediaRecorder = null, chunks = [], videoBlob = null;
+let timeRemaining = 50 * 60; // 50 minutes in seconds
 
 function formatTime(sec) {
   const m = String(Math.floor(sec / 60)).padStart(2, "0");
@@ -9,7 +9,7 @@ function formatTime(sec) {
 }
 
 function startTimer() {
-  if (timer) return;
+  if (timer) return; // prevent multiple timers
   timer = setInterval(() => {
     timeRemaining--;
     document.getElementById("timer").textContent = `⏳ ${formatTime(timeRemaining)}`;
@@ -29,33 +29,95 @@ function resetTimer() {
 }
 
 function show(id) {
-  document.querySelectorAll('.section').forEach(s => s.classList.add('hidden'));
+  document.querySelectorAll('.section').forEach(section => section.classList.add('hidden'));
   const section = document.getElementById(id);
   if (section) section.classList.remove('hidden');
+
+  // Scroll top for UX
   const container = document.getElementById('all-content');
   if (container) container.scrollTo({ top: 0, behavior: 'smooth' });
   else window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
-function startReading() { enableExamLock(); show("reading-section"); startTimer(); }
-function backToIntro() { show("intro-section"); resetTimer(); }
-function goToGrammar() { show("grammar-section"); }
-function goToReading() { show("reading-section"); }
-function goToWriting() { show("writing-section"); }
-function goToVideo() { show("video-section"); }
+/***** BUTTON HANDLERS *****/
+function startReading(){
+  enableExamLock(); // Fullscreen lock
+  show("reading-section");
+  startTimer();
+}
 
+function backToIntro() {
+  show("intro-section"); // fixed from instructions-box to intro-section
+  resetTimer();
+}
+
+function goToGrammar()   { show("grammar-section"); }
+function goToReading()   { show("reading-section"); }
+function goToWriting()   { show("writing-section"); }
+function goToVideo()     { show("video-section"); }
+
+  gradeMCQ(); // grade before finishing
+
+  // Get answers now to capture user input at finish time
+  const writingAns = document.querySelector('textarea')?.value || '';
+
+  // Save submission locally
+  const subs = JSON.parse(localStorage.getItem('submissions') || '[]');
+  subs.push({
+    id: Date.now().toString(36),
+    ...(JSON.parse(localStorage.getItem('currentStudent') || '{}')),
+    mcqScore: window.mcqScore || 0,
+    writingAnswer: writingAns,
+    writingScore: null,  // to be graded later by teacher
+    videoUrl: null       // will update when upload is done
+  });
+  localStorage.setItem('submissions', JSON.stringify(subs));
+
+  // Show thank you message
+  const messageDiv = document.createElement('div');
+  messageDiv.textContent = "Thank you for completing the test! You will be redirected shortly.";
+  messageDiv.style.fontSize = "20px";
+  messageDiv.style.textAlign = "center";
+  messageDiv.style.marginTop = "20px";
+  document.body.appendChild(messageDiv);
+
+  resetTimer();
+
+  // Redirect after 2 seconds
+  setTimeout(() => {
+    window.location.href = "end.html";
+  }, 2000);
+
+
+/***** MCQ GRADING FUNCTION (example) *****/
 function gradeMCQ() {
+  // This should calculate score based on your MCQ input
+  // Replace with your actual logic if different
   const ANSWER_KEY = {
-    q1: "a", q2: "b"
+    q1: "a", q2: "b", /* etc. your key */
   };
-  let correct = 0;
-  Object.entries(ANSWER_KEY).forEach(([name, correctAnswer]) => {
+
+  let correct = 0, total = 0;
+  Object.entries(ANSWER_KEY).forEach(([name, right]) => {
+    total++;
     const chosen = document.querySelector(`input[name="${name}"]:checked`);
-    if (chosen && chosen.value === correctAnswer) correct++;
+    if (chosen && chosen.value === right) correct++;
   });
   window.mcqScore = correct;
-  window.mcqTotal = Object.keys(ANSWER_KEY).length;
+  window.mcqTotal = total;
 }
+
+/***** VIDEO RECORDING *****/
+const startBtn = document.getElementById('startBtn');
+const stopBtn = document.getElementById('stopBtn');
+const redoBtn = document.getElementById('redoBtn');
+const playback = document.getElementById('playback');
+
+
+let mediaStream = null;
+let mediaRecorder = null;
+let chunks = [];
+let videoBlob = null;
 
 async function initCamera() {
   if (mediaStream) return;
@@ -74,10 +136,14 @@ function startRecording() {
     mediaRecorder.ondataavailable = e => chunks.push(e.data);
     mediaRecorder.onstop = handleRecordingStop;
     mediaRecorder.start();
+
     startBtn.disabled = true;
     stopBtn.disabled = false;
     redoBtn.disabled = true;
-    setTimeout(() => { if (mediaRecorder?.state === 'recording') stopRecording(); }, 60000);
+
+    setTimeout(() => {
+      if (mediaRecorder?.state === 'recording') stopRecording();
+    }, 60000);
   });
 }
 
@@ -90,59 +156,71 @@ function stopRecording() {
 
 function handleRecordingStop() {
   videoBlob = new Blob(chunks, { type: 'video/webm' });
+  const playback = document.getElementById('playback');
   playback.src = URL.createObjectURL(videoBlob);
   playback.classList.remove('hidden');
   redoBtn.disabled = false;
 }
 
 function redoRecording() {
+  const playback = document.getElementById('playback');
   playback.classList.add('hidden');
   playback.src = '';
   videoBlob = null;
+
   startBtn.disabled = false;
   redoBtn.disabled = true;
 }
 
+/***** SUBMIT EXAM (optional if using server) *****/
 async function finishExam() {
-  gradeMCQ();
+  gradeMCQ(); // score MCQs
+
+  const writingAns = document.querySelector('textarea')?.value || '';
   const studentId = localStorage.getItem("studentId");
-  const studentInfo = JSON.parse(localStorage.getItem("currentStudent") || '{}');
+
   if (!studentId) {
-    alert("Student ID missing. Please restart.");
+    alert("Student ID not found.");
     return;
   }
-  const writingAns = document.querySelector("textarea")?.value || '';
+
   let videoUrl = null;
 
-  try {
-    if (videoBlob) {
-      const formData = new FormData();
-      formData.append("file", videoBlob);
-      formData.append("upload_preset", "exam_videos");
-      formData.append("cloud_name", "dihabha4b");
-      const res = await fetch("https://api.cloudinary.com/v1_1/dihabha4b/video/upload", { method: "POST", body: formData });
+  if (videoBlob) {
+    // Upload to Cloudinary
+    const formData = new FormData();
+    formData.append("file", videoBlob);
+    formData.append("upload_preset", "exam_videos");
+    formData.append("cloud_name", "dihabha4b");
+
+    try {
+      const res = await fetch("https://api.cloudinary.com/v1_1/dihabha4b/video/upload", {
+        method: "POST",
+        body: formData
+      });
       const data = await res.json();
-      if (!data.secure_url) throw new Error("Upload failed");
       videoUrl = data.secure_url;
+    } catch (err) {
+      alert("Video upload failed.");
+      console.error(err);
+      return; // Stop if upload fails
     }
-
-    await db.collection("students").doc(studentId).set({
-      ...studentInfo,
-      mcqScore: window.mcqScore || 0,
-      writingAnswer: writingAns,
-      videoUrl,
-      submittedAt: firebase.firestore.Timestamp.now()
-    }, { merge: true });
-
-    alert("✅ Exam submitted successfully!");
-    window.location.href = "end.html";
-  } catch (err) {
-    console.error("Submission error:", err);
-    alert("Something went wrong during submission.");
   }
+
+  // Save to Firestore
+  await db.collection("students").doc(studentId).set({
+    mcqScore: window.mcqScore || 0,
+    writingAnswer: writingAns,
+    videoUrl,
+    submittedAt: firebase.firestore.Timestamp.now()
+  }, { merge: true });
+
+  alert("Exam submitted successfully!");
+  window.location.href = "end.html";
 }
 
-document.addEventListener("DOMContentLoaded", () => {
-  const finishBtn = document.getElementById("finishBtn");
-  if (finishBtn) finishBtn.addEventListener("click", finishExam);
-});
+const studentId = localStorage.getItem("studentId");
+const studentInfo = JSON.parse(localStorage.getItem("currentStudent") || '{}');
+
+
+
