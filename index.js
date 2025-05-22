@@ -105,3 +105,21 @@ if (videoBlob) {
     alert("❌ Failed to upload video: " + err.message);
   }
 }
+
+const query = await db.collection("students")
+  .where("pin", "==", pin)
+  .where("email", "==", email) // optional: to make PIN + email unique
+  .get();
+
+if (query.empty) {
+  alert("Invalid or expired code.");
+  return;
+}
+
+// Use the first matching student
+const doc = query.docs[0];
+const studentId = doc.id;
+localStorage.setItem("studentId", studentId);
+localStorage.setItem("currentStudent", JSON.stringify(doc.data()));
+window.location.href = "exam.html";
+
