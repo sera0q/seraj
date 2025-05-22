@@ -636,65 +636,61 @@ updateGrammarView();   // initialise
 <script>
   document.addEventListener("DOMContentLoaded", () => {
     // Final Finish Exam Handler
-  async function finishExam() {
-    gradeMCQ(); // Auto-grade MCQs
-
-    const studentId = localStorage.getItem("studentId");
-    if (!studentId) {
-      alert("Student ID missing. Please restart the exam.");
-      window.location.href = "index.html";
-      return;
-    }
-
-    const writingAns = document.querySelector("textarea")?.value || '';
-    let videoUrl = null;
-
-    // Upload video to Cloudinary
-    if (videoBlob) {
-      try {
-        const formData = new FormData();
-        formData.append("file", videoBlob);
-        formData.append("upload_preset", "exam_videos");
-        formData.append("cloud_name", "dihabha4b");
-
-        const res = await fetch("https://api.cloudinary.com/v1_1/dihabha4b/video/upload", {
-          method: "POST",
-          body: formData
-        });
-
-        const data = await res.json();
-        videoUrl = data.secure_url;
-      } catch (err) {
-        console.error("Video upload failed:", err);
-        alert("Video upload failed.");
+    async function finishExam() {
+      gradeMCQ(); // auto-grade MCQs
+  
+      const studentId = localStorage.getItem("studentId");
+      if (!studentId) {
+        alert("Student ID missing. Please restart the exam.");
+        window.location.href = "index.html";
         return;
       }
+  
+      const writingAns = document.querySelector("textarea")?.value || '';
+      let videoUrl = null;
+  
+      if (videoBlob) {
+        try {
+          const formData = new FormData();
+          formData.append("file", videoBlob);
+          formData.append("upload_preset", "exam_videos");
+          formData.append("cloud_name", "dihabha4b");
+  
+          const res = await fetch("https://api.cloudinary.com/v1_1/dihabha4b/video/upload", {
+            method: "POST",
+            body: formData
+          });
+  
+          const data = await res.json();
+          videoUrl = data.secure_url;
+        } catch (err) {
+          console.error("Video upload failed:", err);
+          alert("Video upload failed.");
+          return;
+        }
+      }
+  
+      try {
+        await db.collection("students").doc(studentId).set({
+          mcqScore: window.mcqScore || 0,
+          writingAnswer: writingAns,
+          videoUrl,
+          submittedAt: firebase.firestore.Timestamp.now()
+        }, { merge: true });
+  
+        alert("Exam submitted successfully!");
+        window.location.href = "end.html";
+      } catch (err) {
+        console.error("Submission failed:", err);
+        alert("Something went wrong during submission.");
+      }
     }
-
-    // Store results in Firestore
-    try {
-      await db.collection("students").doc(studentId).set({
-        mcqScore: window.mcqScore || 0,
-        writingAnswer: writingAns,
-        videoUrl,
-        submittedAt: firebase.firestore.Timestamp.now()
-      }, { merge: true });
-
-      alert("Exam submitted successfully!");
-      window.location.href = "end.html";
-    } catch (err) {
-      console.error("Submission failed:", err);
-      alert("Something went wrong during submission.");
-    }
-  }
-
-  // Attach once the DOM is ready
-  document.addEventListener("DOMContentLoaded", () => {
+  
+    // Attach to button
     const finishBtn = document.getElementById("finishBtn");
     if (finishBtn) finishBtn.addEventListener("click", finishExam);
   });
-</script>
-
+  </script>
   
   </body>
   </html>
@@ -788,6 +784,13 @@ updateGrammarView();   // initialise
       window.mcqTotal = total;
     }
     
+    /* 3. Hook into finishExam()   (call gradeMCQ first) */
+    const originalFinish = window.finishExam;          // keep reference
+    window.finishExam = function(){
+      gradeMCQ();                                      // ← auto‑grade
+      /* optionally console.log(window.mcqScore, "of", window.mcqTotal); */
+      originalFinish();                                // continue normal flow
+    };
     </script>
     <script>
 
