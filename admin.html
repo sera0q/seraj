@@ -1,178 +1,306 @@
 <!DOCTYPE html>
 <html lang="en">
+  
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1.0">
-<title>Cambright • Admin Dashboard</title>
-<style>
-body{font-family:Arial,Helvetica,sans-serif;margin:0;background:#f4f4f9}
-h1{margin:0;padding:20px;background:#2a8cff;color:#fff}
-section.gen{background:#fff;padding:20px;border-bottom:1px solid #ccc}
-table{width:100%;max-width:1200px;margin:20px auto;border-collapse:collapse;background:#fff}
-th,td{border:1px solid #ccc;padding:8px;font-size:14px;text-align:left}
-th{background:#eef}tr:nth-child(even){background:#fafafa}
-button{padding:6px 12px;border:none;border-radius:4px;font-size:14px;background:#2a8cff;color:#fff;cursor:pointer}
-button:hover{background:#005fcc}
-#modal{position:fixed;inset:0;background:rgba(0,0,0,.6);display:none;align-items:center;justify-content:center}
-#modal .box{background:#fff;max-width:650px;width:90%;padding:20px;border-radius:6px}
-textarea{width:100%;min-height:140px}
-.close{background:#e53935;margin-left:8px}.close:hover{background:#b71c1c}
-</style>
+  <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-storage-compat.js"></script>
+
+  <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-firestore-compat.js"></script>
+<script>
+  function closeModal() {
+  document.getElementById("modal").style.display = "none";
+  document.getElementById("saveMessage").style.display = "none"; // hide "Saved!" message
+}
+
+function printSubmission() {
+  const name = document.getElementById("modalName").textContent;
+  const email = document.getElementById("modalEmail").textContent;
+  const passport = document.getElementById("modalPassport").textContent;
+  const mcq = document.getElementById("modalMcq").textContent;
+  const writing = document.getElementById("modalWriting").value;
+  const score = document.getElementById("modalScore").value;
+
+  const win = window.open('', '', 'height=700,width=700');
+  win.document.write(`<h2>${name} - Exam Report</h2>`);
+  win.document.write(`<p><strong>Email:</strong> ${email}<br>`);
+  win.document.write(`<strong>Passport:</strong> ${passport}<br>`);
+  win.document.write(`<strong>MCQ Score:</strong> ${mcq}/50<br>`);
+  win.document.write(`<strong>Writing Score:</strong> ${score}/20</p>`);
+  win.document.write(`<h3>Writing Answer</h3><pre>${writing}</pre>`);
+  win.document.close();
+  win.print();
+}
+function downloadDoc() {
+  const name = document.getElementById("modalName").textContent;
+  const email = document.getElementById("modalEmail").textContent;
+  const passport = document.getElementById("modalPassport").textContent;
+  const mcq = document.getElementById("modalMcq").textContent;
+  const writing = document.getElementById("modalWriting").value;
+  const score = document.getElementById("modalScore").value;
+
+  const content = `
+    <h2>${name} - Exam Report</h2>
+    <p><strong>Email:</strong> ${email}<br>
+    <strong>Passport:</strong> ${passport}<br>
+    <strong>MCQ Score:</strong> ${mcq}/26<br>
+    <strong>Writing Score:</strong> ${score}/20</p>
+    <h3>Writing Answer</h3>
+    <pre>${writing}</pre>
+  `;
+
+  const blob = new Blob([content], { type: "application/msword" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = `${name.replace(/\s+/g, '_')}_Exam.doc`;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+}
+
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyDEq-mHxMtGW1LxSSqDDssVB_o0kBk3v3g",
+    authDomain: "final-project-f5605.firebaseapp.com",
+    projectId: "final-project-f5605", 
+   };
+  firebase.initializeApp(firebaseConfig);
+  const db = firebase.firestore();
+  </script>
+
+
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Cambright Admin Dashboard</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 0; background: #f0f2f5; }
+    header { background: #2a8cff; color: #fff; padding: 20px; font-size: 20px; }
+    section { padding: 20px; background: #fff; margin-bottom: 10px; }
+    button { background: #2a8cff; color: white; border: none; padding: 8px 14px; border-radius: 4px; cursor: pointer; }
+    button:hover { background: #005fcc; }
+    table { width: 100%; border-collapse: collapse; margin-top: 10px; background: white; }
+    th, td { border: 1px solid #ccc; padding: 8px; text-align: left; font-size: 14px; }
+    th { background: #e0e8ff; }
+    tr:nth-child(even) { background: #f9f9f9; }
+    .modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.6); justify-content: center; align-items: center; }
+    .modal-box { background: white; padding: 20px; border-radius: 8px; width: 90%; max-width: 600px; }
+    textarea { width: 100%; height: 100px; }
+    .close-btn { background: #e53935; }
+    .close-btn:hover { background: #b71c1c; }
+  </style>
 </head>
 <body>
-<h1>Teacher / Admin Dashboard</h1>
+<header>Teacher / Admin Dashboard</header>
 
-<!-- ===== PIN generator ===== -->
-<section class="gen">
-  <h2>Create 6‑digit Access PIN (valid 30 min)</h2>
-  <button onclick="makePin()">Generate Code</button>
-  <span id="pinShow" style="font-weight:bold;margin-left:12px"></span>
-  <span id="pinTimer" style="margin-left:12px;color:#e53935"></span>
+<!-- PIN Generator -->
+<section>
+  <h2>Create 6‑digit Access PIN (valid 60 min)</h2>
+  <button onclick="generatePin()">Generate Code</button>
+  <strong id="pinDisplay" style="margin-left: 12px;"></strong>
+  <span id="pinCountdown" style="margin-left: 12px; color: #e53935;"></span>
 </section>
 
-<!-- ===== submissions table ===== -->
-<table>
-<thead>
- <tr><th>Name</th><th>Email</th><th>Passport</th><th>MCQ</th><th>Writing</th><th>Video</th><th>Total</th><th>Action</th></tr>
-</thead>
-<tbody id="rows"></tbody>
-</table>
+<!-- Submissions Table -->
+<section>
+  <h2>Submissions</h2>
+  <table>
+    <thead>
+<tr><th>Name</th><th>Email</th><th>Passport</th><th>MCQ</th><th>Writing</th><th>Total</th><th>Action</th><th>Video</th></tr>
+    </thead>
+    <tbody id="submissionTable"></tbody>
+  </table>
+</section>
 
-<!-- ===== modal ===== -->
-<div id="modal">
- <div class="box">
-   <h2 id="mName"></h2>
-   <p><strong>Email:</strong> <span id="mEmail"></span></p>
-   <p><strong>Passport:</strong> <span id="mPass"></span></p>
-   <p><strong>MCQ Score:</strong> <span id="mMcq"></span>/26</p>
-
-   <h3>Writing Answer</h3>
-   <textarea id="mWriting" readonly></textarea>
-
-   <label>Writing Score (0‑20):
-     <input type="number" id="mWscore" min="0" max="20" style="width:80px">
-   </label><br><br>
-
-   <button onclick="saveScore()">Save</button>
-   <button onclick="printSubmission()">Print / Save PDF</button>
-   <button onclick="downloadWord()">Download DOC</button>
-   <button class="close" onclick="closeModal()">Close</button>
-   <p id="saved" style="color:green;display:none;margin-top:8px">Saved!</p>
- </div>
+<!-- Modal -->
+<div class="modal" id="modal">
+  <div class="modal-box">
+    <h3 id="modalName"></h3>
+    <p>Email: <span id="modalEmail"></span></p>
+    <p>Passport: <span id="modalPassport"></span></p>
+    <p>MCQ Score: <span id="modalMcq"></span>/26</p>
+    <h4>Writing Answer:</h4>
+    <textarea id="modalWriting" readonly></textarea>
+    <label>Writing Score (0–20): <input type="number" id="modalScore" min="0" max="20" style="width: 60px;"></label>
+    <br><br>
+    <button onclick="saveScore()">Save</button>
+    <button onclick="printSubmission()">Print / PDF</button>
+    <button onclick="downloadDoc()">Download DOC</button>
+    <button class="close-btn" onclick="closeModal()">Close</button>
+    <p id="saveMessage" style="color: green; display: none;">Saved!</p>
+  </div>
 </div>
 
 <script>
-/* ---------- PIN GENERATION ---------- */
-function makePin(){
-  const pin = String(Math.floor(100000+Math.random()*900000));
-  const expires = Date.now()+30*60*1000;          // 30 min
-  localStorage.setItem('examPin',JSON.stringify({pin,expires}));
+  let currentId = null;
+  let countdownInterval;
 
-  document.getElementById('pinShow').textContent='PIN: '+pin;
-  startPinCountdown();                            // start only now
-}
 
-function startPinCountdown(){
-  clearInterval(window.pinInt);                   // reset old timer
-  window.pinInt=setInterval(()=>{
-    const obj=JSON.parse(localStorage.getItem('examPin')||'null');
-    const out=document.getElementById('pinTimer');
-    if(!obj){out.textContent='';clearInterval(window.pinInt);return;}
-
-    const diff=obj.expires-Date.now();
-    if(diff<=0){
-      localStorage.removeItem('examPin');
-      out.textContent='(expired)';
-      clearInterval(window.pinInt);
-    }else{
-      const m=Math.floor(diff/60000),
-            s=Math.floor((diff%60000)/1000);
-      out.textContent=`(expires in ${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')})`;
-    }
-  },1000);
-}
-
-/* ---------- TABLE RENDER ---------- */
-const rows=document.getElementById('rows');
-function getSubs(){return JSON.parse(localStorage.getItem('submissions')||'[]');}
-function saveSubs(arr){localStorage.setItem('submissions',JSON.stringify(arr));}
-
-function render(){
-  rows.innerHTML='';
-  getSubs().forEach(sub=>{
-    const total=sub.writingScore==null?'—':sub.mcqScore+sub.writingScore;
-    const wStat=sub.writingScore==null?'⏳ not graded':sub.writingScore+'/20';
-    const vStat=sub.videoUrl?`<button onclick="openVideo('${sub.videoUrl}')">View Video</button>`:'—';
-    rows.insertAdjacentHTML('beforeend',`
-      <tr>
-        <td>${sub.name||'—'}</td>
-        <td>${sub.email||'—'}</td>
-        <td>${sub.passport||'—'}</td>
-        <td>${sub.mcqScore}/26</td>
-        <td>${wStat}</td>
-        <td style="text-align:center">${vStat}</td>
-        <td>${total}</td>
-        <td><button onclick="openModal('${sub.id}')">Open</button></td>
-      </tr>`);
+  
+    async function fetchSubsFromFirestore() {
+  const snapshot = await db.collection("students").get();
+  const subs = [];
+  snapshot.forEach(doc => {
+    subs.push({ id: doc.id, ...doc.data() });
   });
-}
-render();
-
-/* ---------- MODAL ---------- */
-const modal=document.getElementById('modal');
-const mName=document.getElementById('mName');
-const mEmail=document.getElementById('mEmail');
-const mPass=document.getElementById('mPass');
-const mMcq=document.getElementById('mMcq');
-const mWriting=document.getElementById('mWriting');
-const mWscore=document.getElementById('mWscore');
-let currentId=null;
-
-function openModal(id){
-  const sub=getSubs().find(s=>s.id===id); if(!sub) return;
-  currentId=id;
-  mName.textContent=sub.name||'Unnamed';
-  mEmail.textContent=sub.email||'—';
-  mPass.textContent=sub.passport||'—';
-  mMcq.textContent=sub.mcqScore;
-  mWriting.value=sub.writingAnswer||'';
-  mWscore.value=sub.writingScore??'';
-  document.getElementById('saved').style.display='none';
-  modal.style.display='flex';
-}
-function closeModal(){modal.style.display='none';}
-
-/* ---------- SAVE WRITING SCORE ---------- */
-function saveScore(){
-  const val=Number(mWscore.value);
-  if(isNaN(val)||val<0||val>20){alert('Enter 0‑20');return;}
-  const subs=getSubs();
-  const sub=subs.find(s=>s.id===currentId); if(!sub) return;
-  sub.writingScore=val; saveSubs(subs); render();
-  document.getElementById('saved').style.display='block';
+  renderTable(subs);
 }
 
-/* ---------- PRINT / WORD ---------- */
-function printSubmission(){
-  const w=window.open('','print','width=800,height=600');
-  w.document.write('<pre>'+mWriting.value.replace(/</g,'&lt;')+'</pre>');
-  w.document.close();w.focus();w.print();w.close();
-}
-function downloadWord(){
-  const html='<html><body><pre>'+mWriting.value.replace(/</g,'&lt;')+'</pre></body></html>';
-  const blob=new Blob(['\ufeff',html],{type:'application/msword'});
-  const url=URL.createObjectURL(blob);
-  const a=document.createElement('a');
-  a.href=url;
-  a.download=mName.textContent.replace(/\s+/g,'_')+'_submission.doc';
-  document.body.appendChild(a);a.click();a.remove();
-  URL.revokeObjectURL(url);
+
+  function startCountdown() {
+    clearInterval(countdownInterval);
+    const pinData = JSON.parse(localStorage.getItem('examPin'));
+    if (!pinData) return;
+
+    countdownInterval = setInterval(() => {
+      const now = Date.now();
+      const diff = pinData.expires - now;
+
+      if (diff <= 0) {
+        document.getElementById("pinCountdown").textContent = "Expired";
+        clearInterval(countdownInterval);
+        return;
+      }
+
+      const minutes = Math.floor(diff / 60000);
+      const seconds = Math.floor((diff % 60000) / 1000);
+      document.getElementById("pinCountdown").textContent = `${minutes}:${seconds.toString().padStart(2, '0')} remaining`;
+    }, 1000);
+  }
+  async function viewVideo(subId) {
+  const doc = await db.collection("students").doc(subId).get();
+  if (!doc.exists) {
+    alert("Submission not found.");
+    return;
+  }
+  const sub = doc.data();
+  if (sub.videoUrl) {
+    window.open(sub.videoUrl, '_blank');
+  } else {
+    alert("No video available for this submission.");
+  }
 }
 
-/* ---------- OPEN VIDEO ---------- */
-function openVideo(url){
-  window.open(url,'_blank');
+function renderTable(subs) {
+  const table = document.getElementById("submissionTable");
+  table.innerHTML = "";
+  if (subs.length === 0) {
+  table.innerHTML = `<tr><td colspan="8">No submissions found.</td></tr>`;
+  return;
 }
+
+subs.forEach(sub => {
+  const total = (typeof sub.mcqScore === 'number' && typeof sub.writingScore === 'number')
+    ? (sub.mcqScore + sub.writingScore)
+    : "—";
+
+  const writing = sub.writingScore != null ? `${sub.writingScore}/20` : "not graded";
+
+  table.innerHTML += `
+    <tr>
+      <td>${sub.name || ""}</td>
+      <td>${sub.email || ""}</td>
+      <td>${sub.passport || ""}</td>
+      <td>${sub.mcqScore || 0}/50</td>
+      <td>${writing}</td>
+      <td>${total}</td>
+
+      <td><button onclick="openModal('${sub.id}')">Open</button></td>
+            <button onclick="deleteSubmission('${sub.id}')">Delete</button>
+      <td><button onclick="viewVideo('${sub.id}')">View Video</button></td>
+    </tr>`;
+});
+
+
+  localStorage.setItem("submissions", JSON.stringify(subs)); // optional local cache
+
+}
+async function saveScore() {
+  const val = Number(document.getElementById("modalScore").value);
+  if (isNaN(val) || val < 0 || val > 20) {
+    alert("Enter a valid score (0–1)");
+    return;
+  }
+
+  await db.collection("students").doc(currentId).update({
+    writingScore: val
+  });
+
+  document.getElementById("saveMessage").style.display = "block";
+  closeModal();
+}
+async function openModal(id) {
+  currentId = id;
+  const doc = await db.collection("students").doc(id).get();
+  if (!doc.exists) return;
+
+  const sub = doc.data();
+  document.getElementById("modalName").textContent = sub.name || "";
+  document.getElementById("modalEmail").textContent = sub.email || "";
+  document.getElementById("modalPassport").textContent = sub.passport || "";
+  document.getElementById("modalMcq").textContent = sub.mcqScore || 0;
+  document.getElementById("modalWriting").value = sub.writingAnswer || "";
+  document.getElementById("modalScore").value = sub.writingScore ?? "";
+  document.getElementById("modal").style.display = "flex";
+}
+
+
+// No PIN creation here — just load submissions
+window.onload = () => {
+  const saved = localStorage.getItem('examPin');
+  if (saved) {
+    const { pin } = JSON.parse(saved);
+    document.getElementById("pinDisplay").textContent = "PIN: " + pin;
+    startCountdown();
+  }
+
+  fetchSubsFromFirestore();
+};
+  
+    async function generatePin() {
+  const pin = String(Math.floor(100000 + Math.random() * 900000)); // Random 6-digit
+  const expiresAt = new Date(Date.now() + 60 * 60 * 1000); // 30 minutes
+
+  try {
+    await db.collection("accessPins").doc(pin).set({
+      expiresAt: firebase.firestore.Timestamp.fromDate(expiresAt)
+    });
+
+    localStorage.setItem("examPin", JSON.stringify({ pin, expires: expiresAt.getTime() }));
+
+    document.getElementById("pinDisplay").textContent = "PIN: " + pin;
+    startCountdown();
+  } catch (error) {
+    console.error("Error saving PIN to Firestore:", error);
+    alert("Failed to generate PIN.");
+  }
+}
+
+async function deleteSubmission(id) {
+  if (!confirm("Are you sure you want to delete this submission?")) return;
+
+  try {
+    // Optionally delete video from Firebase Storage if needed
+    const doc = await db.collection("students").doc(id).get();
+    const data = doc.data();
+    if (data.videoUrl) {
+      // Delete from Firebase Storage
+      const storageRef = firebase.storage().refFromURL(data.videoUrl);
+      await storageRef.delete();
+    }
+
+    // Delete Firestore document
+    await db.collection("students").doc(id).delete();
+
+    alert("Submission deleted.");
+    fetchSubsFromFirestore(); // Refresh the table
+  } catch (err) {
+    console.error("Error deleting submission:", err);
+    alert("Failed to delete submission.");
+  }
+}
+const storage = firebase.storage();
+
+
 </script>
 </body>
 </html>
