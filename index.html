@@ -1,38 +1,215 @@
 <!DOCTYPE html>
 <html lang="en">
+  
 <head>
+
+<!-- Firebase SDKs -->
+<script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-firestore-compat.js"></script>
+
+<script>
+  // Your Firebase config — replace with your own from Firebase Console
+  const firebaseConfig = {
+    apiKey: "AIzaSyDEq-mHxMtGW1LxSSqDDssVB_o0kBk3v3g",
+    authDomain: "final-project-f5605.firebaseapp.com",
+    projectId: "final-project-f5605", 
+    // ... other config fields if needed
+  };
+  // Initialize Firebase
+  firebase.initializeApp(firebaseConfig);
+  const db = firebase.firestore();
+</script>
+
+
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Cambright Placement Test</title>
-
-  <!-- Add ?v=1 to force refresh every time you update -->
-  <script type="module" crossorigin src="/assets/index-CJ820Ua9.js"></script>
-  <link rel="stylesheet" crossorigin href="/assets/index-BLvYl0XV.css">
+  <link rel="stylesheet" href="global.css" />
 </head>
 <body>
-  <!-- Hero banner -->
+  <!-- Hero Banner -->
   <div class="hero-banner"></div>
 
-  
-  <!-- Headline under banner -->
+  <!-- Hero Text -->
   <div class="hero-text">
-    <h2>Your journey to better English starts here!</h2>
+    <h2>Cambright Placement Test</h2>
+    <p>Please enter your details to begin.</p>
   </div>
 
-  <!-- welcome.html core structure -->
-<div class="welcome-card">
-  <h1>Welcome to the Cambright Placement Test!</h1>
+  <!-- Welcome Card -->
+  <div class="welcome-card">
+    <h1>Enter Your Details</h1>
+    <form id="welcome-form">
+      <input type="text" id="studentName" placeholder="Enter your name" required />
+      <input type="text" id="studentPassport" placeholder="Enter passport number" required />
+      <input type="email" id="studentEmail" placeholder="Enter your email" required />
+      <input type="text" id="pinInput" placeholder="Enter exam code" required />
 
-  <form id="welcome-form" onsubmit="return false;">
-    <input id="studentName"     placeholder="Full Name"        required>
-    <input id="studentEmail"    type="email" placeholder="Email" required>
-    <input id="studentPassport" placeholder="Passport Number"  required>
+      <div id="pin-error" style="color: red; display: none;">Invalid PIN</div>
 
-    <input id="pinInput" maxlength="6" placeholder="Access Code (6 digits)" required>
-    <div id="pin-error" class="error-box">Invalid or expired code.</div>
+      <button type="submit" id="startBtn" class="btn-primary">Start Test</button>
+    </form>
+  </div>
 
-    <button id="startBtn" class="btn-primary" disabled>Start Test</button>
-  </form>
-</div>
+  <script>
+    document.getElementById("welcome-form").addEventListener("submit", async (e) => {
+      e.preventDefault();
+
+      const name = document.getElementById("studentName").value.trim();
+      const passport = document.getElementById("studentPassport").value.trim();
+      const email = document.getElementById("studentEmail").value.trim();
+      const pin = document.getElementById("pinInput").value.trim();
+
+      if (!name || !passport || !email || !pin) {
+        alert("Please fill in all fields.");
+        return;
+      }
+
+      try {
+        // Add student to Firestore
+        const docRef = await db.collection("students").add({
+          name,
+          passport,
+          email,
+          pin,
+          startTime: firebase.firestore.Timestamp.now()
+        });
+
+        const studentId = docRef.id;
+
+        // Store to localStorage for exam.html to use
+        localStorage.setItem("studentId", studentId);
+        localStorage.setItem("currentStudent", JSON.stringify({ name, passport, email }));
+
+        // Redirect to the exam page
+        window.location.href = "exam.html";
+      } catch (err) {
+        console.error("Error adding student:", err);
+        alert("Something went wrong. Please try again.");
+      }
+    });
+  </script>
+  
+  <!-- JS file loaded last -->
+  <script src="index.js" defer></script>
 </body>
+
+<script>
+  document.addEventListener("DOMContentLoaded", () => {
+    // Buttons
+    const startBtn = document.getElementById("startBtn");
+    const stopBtn = document.getElementById("stopBtn");
+    const redoBtn = document.getElementById("redoBtn");
+    const playback = document.getElementById("playback");
+    const finishBtn = document.getElementById("finishBtn");
+  
+    // Recording setup
+    let mediaStream = null;
+    let mediaRecorder = null;
+    let chunks = [];
+    let videoBlob = null;
+  
+    async function initCamera() {
+      if (mediaStream) return;
+      try {
+        mediaStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
+        document.getElementById('preview').srcObject = mediaStream;
+      } catch {
+        alert('Webcam/microphone access denied.');
+      }
+    }
+  
+    function startRecording() {
+      initCamera().then(() => {
+        chunks = [];
+        mediaRecorder = new MediaRecorder(mediaStream, { mimeType: 'video/webm;codecs=vp9,opus' });
+        mediaRecorder.ondataavailable = e => chunks.push(e.data);
+        mediaRecorder.onstop = handleRecordingStop;
+        mediaRecorder.start();
+  
+        startBtn.disabled = true;
+        stopBtn.disabled = false;
+        redoBtn.disabled = true;
+  
+        setTimeout(() => {
+          if (mediaRecorder?.state === 'recording') stopRecording();
+        }, 60000);
+      });
+    }
+  
+    function stopRecording() {
+      if (mediaRecorder?.state === 'recording') {
+        mediaRecorder.stop();
+        stopBtn.disabled = true;
+      }
+    }
+  
+    function handleRecordingStop() {
+      videoBlob = new Blob(chunks, { type: 'video/webm' });
+      playback.src = URL.createObjectURL(videoBlob);
+      playback.classList.remove('hidden');
+      redoBtn.disabled = false;
+    }
+  
+    function redoRecording() {
+      playback.classList.add('hidden');
+      playback.src = '';
+      videoBlob = null;
+  
+      startBtn.disabled = false;
+      redoBtn.disabled = true;
+    }
+  
+    startBtn.onclick = startRecording;
+    stopBtn.onclick = stopRecording;
+    redoBtn.onclick = redoRecording;
+  
+    finishBtn.onclick = async function finishExam() {
+      const studentId = localStorage.getItem("studentId");
+      if (!studentId) {
+        alert("Student ID not found. Please restart the exam.");
+        window.location.href = "index.html";
+        return;
+      }
+  
+      const writingAns = document.querySelector("textarea")?.value || '';
+      let videoUrl = null;
+  
+      try {
+        if (videoBlob) {
+          const formData = new FormData();
+          formData.append("file", videoBlob);
+          formData.append("upload_preset", "exam_videos");
+          formData.append("cloud_name", "dihabha4b");
+  
+          const res = await fetch("https://api.cloudinary.com/v1_1/dihabha4b/video/upload", {
+            method: "POST",
+            body: formData
+          });
+  
+          const data = await res.json();
+          videoUrl = data.secure_url;
+        }
+  
+        const mcqScore = window.mcqScore || 0;
+  
+        await db.collection("students").doc(studentId).set({
+          mcqScore,
+          writingAnswer: writingAns,
+          videoUrl,
+          submittedAt: firebase.firestore.Timestamp.now()
+        }, { merge: true });
+  
+        alert("Exam submitted successfully!");
+        window.location.href = "end.html";
+  
+      } catch (err) {
+        console.error("Submission failed:", err);
+        alert("Something went wrong during submission.");
+      }
+    };
+  });
+  </script>
+  
+
 </html>
