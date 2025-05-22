@@ -1,6 +1,27 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+  <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-firestore-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-storage-compat.js"></script>
+  
+  <script>
+
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyDEq-mHxMtGW1LxSSqDDssVB_o0kBk3v3g",
+  authDomain: "final-project-f5605.firebaseapp.com",
+  projectId: "final-project-f5605",
+  storageBucket: "final-project-f5605.firebasestorage.app",
+  messagingSenderId: "237782523160",
+  appId: "1:237782523160:web:85b7226673b35d28f2d26d",
+    };
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.firestore();
+    const storage = firebase.storage();
+  </script>
+  
+  
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
 <title>Cambright Placement Test</title>
@@ -23,6 +44,7 @@ input[type=radio]{margin-right:6px}
 </style>
 </head>
 <body>
+  
 <div class="container">
   <div class="exam-header">
     <h1>Cambright Placement Test</h1>
@@ -475,8 +497,12 @@ input[type=radio]{margin-right:6px}
   <div id="writing-section" class="section hidden">
     <div class="instruction-box"><h3>📘 Instructions:</h3><p>Write 120‑150 words.</p></div>
     <h2>✍️ Writing Section</h2>
-    <p>Describe a memorable holiday you had.</p>
-    <textarea rows="6" placeholder="Write your essay here…"></textarea>
+    <p>Choose one of these topics to write about in one paragraph. Remember to show your writing ability as it determines your studying level. <br><br>
+
+
+      Write about your brother / sister and his / her daily routine.<br><br>
+      Write about a trip or event that you remember well. Where did you go? Who were you with? What happened?"</p>
+    <textarea id="writingAnswer" rows="6" placeholder="Write your essay here…"></textarea>
 
     <div class="navigation">
       <button onclick="goToGrammar()">◀ Previous</button>
@@ -510,22 +536,31 @@ input[type=radio]{margin-right:6px}
       <p style="margin-top: 0;">
         Speak clearly and confidently. <br>
         Mention your name, where you're from, and your goals for learning English.<br><br>
-        Example:<br>
-        "Hi, my name is Sarah. I'm from Libya. I'm learning English to study abroad and improve my career."
+        Speaking question:
+Speak for 2 minutes about yourself and answer these questions:<br>
+<br><br>
+1. What is your name and where are you from?<br><br>
+2. What do you do?<br><br>
+3. What are your interests and hobbies?<br><br>
+4. Why do you want to improve your English?<br><br>
       </p>
     </div>
   </div>
 
+
+  
   <!-- Navigation buttons -->
-  <div class="navigation" style="margin-top:20px; gap:10px">
-    <button id="startBtn" onclick="startRec()">🎥 Start</button>
-    <button id="stopBtn" onclick="stopRec()" disabled>⏹ Stop</button>
-    <button id="redoBtn" onclick="redoRec()" disabled>🔄 Re‑record</button>
-  </div>
+<!-- ✅ FIXED Navigation buttons -->
+<div class="navigation" style="margin-top:20px; gap:10px">
+  <button id="startBtn" onclick="startRecording()">🎥 Start</button>
+  <button id="stopBtn" onclick="stopRecording()" disabled>⏹ Stop</button>
+  <button id="redoBtn" onclick="redoRecording()" disabled>🔄 Re‑record</button>
+</div>
+
 
   <div class="navigation" style="margin-top:30px">
     <button onclick="goToWriting()">◀ Previous</button>
-    <button onclick="finishExam()">Finish Exam</button>
+    <button id="finishBtn" onclick="finishExam()">Finish Exam</button>
   </div>
 </div>
 
@@ -540,7 +575,7 @@ async function initCamera(){
     document.getElementById('preview').srcObject = mediaStream;
   }catch(e){ alert('Webcam/microphone access denied.'); }
 }
-function startRec(){
+function startRecording(){
   initCamera().then(()=>{
     chunks=[];
     mediaRecorder = new MediaRecorder(mediaStream,{mimeType:'video/webm;codecs=vp9,opus'});
@@ -550,10 +585,10 @@ function startRec(){
     // UI
     startBtn.disabled=true; stopBtn.disabled=false; redoBtn.disabled=true;
     // Auto‑stop after 1 minute (60 000 ms)
-    setTimeout(()=>{ if(mediaRecorder?.state==='recording') stopRec(); },60000);
+    setTimeout(()=>{ if(mediaRecorder?.state==='recording') stopRecording(); },60000);
   });
 }
-function stopRec(){
+function stopRecording(){
   if(mediaRecorder?.state==='recording'){ mediaRecorder.stop(); stopBtn.disabled=true; }
 }
 function handleStop(){
@@ -562,12 +597,11 @@ function handleStop(){
   playback.classList.remove('hidden');
   redoBtn.disabled=false;          // allow one more take if they want
 }
-function redoRec(){
+function redoRecording(){
   playback.classList.add('hidden'); playback.src=''; videoBlob=null;
   startBtn.disabled=false; redoBtn.disabled=true;
 }
 </script>
-
 <script>
 /* ===== GLOBAL TIMER ===== */
 let timer=null, timeRemaining=50*60;
@@ -600,39 +634,68 @@ updateGrammarView();   // initialise
 </script>
 <!-- ========== override / final handlers ========== -->
 <script>
-  /* ---------- FINAL finishExam(): no alerts, goes to end.html ---------- */
-  function finishExam(){
-    // friendly inline message
-    const msg=document.createElement('p');
-    msg.textContent = "Thank you! Redirecting…";
-    msg.style.cssText = "text-align:center;font:18px/1.3 sans-serif;margin:40px 0";
-    document.body.appendChild(msg);
-  
-    resetTimer();   // stop global timer
-  
-    /* ---- optional: save answers to localStorage ----
-    const subs = JSON.parse(localStorage.getItem('submissions')||'[]');
-    subs.push({
-      id : Date.now().toString(36),
-      ...(JSON.parse(localStorage.getItem('currentStudent')||'{}')),
-      mcqScore      : window.mcqScore  || 0,
-      writingAnswer : window.writingAns|| '',
-      writingScore  : null,
-      videoUrl      : null
-    });
-    localStorage.setItem('submissions', JSON.stringify(subs));
-    --------------------------------------------------- */
-  
-    // redirect after 1 second
-    setTimeout(()=> window.location.href = "end.html", 1000);
+  document.addEventListener("DOMContentLoaded", () => {
+    // Final Finish Exam Handler
+  async function finishExam() {
+    gradeMCQ(); // Auto-grade MCQs
+
+    const studentId = localStorage.getItem("studentId");
+    if (!studentId) {
+      alert("Student ID missing. Please restart the exam.");
+      window.location.href = "index.html";
+      return;
+    }
+
+    const writingAns = document.querySelector("textarea")?.value || '';
+    let videoUrl = null;
+
+    // Upload video to Cloudinary
+    if (videoBlob) {
+      try {
+        const formData = new FormData();
+        formData.append("file", videoBlob);
+        formData.append("upload_preset", "exam_videos");
+        formData.append("cloud_name", "dihabha4b");
+
+        const res = await fetch("https://api.cloudinary.com/v1_1/dihabha4b/video/upload", {
+          method: "POST",
+          body: formData
+        });
+
+        const data = await res.json();
+        videoUrl = data.secure_url;
+      } catch (err) {
+        console.error("Video upload failed:", err);
+        alert("Video upload failed.");
+        return;
+      }
+    }
+
+    // Store results in Firestore
+    try {
+      await db.collection("students").doc(studentId).set({
+        mcqScore: window.mcqScore || 0,
+        writingAnswer: writingAns,
+        videoUrl,
+        submittedAt: firebase.firestore.Timestamp.now()
+      }, { merge: true });
+
+      alert("Exam submitted successfully!");
+      window.location.href = "end.html";
+    } catch (err) {
+      console.error("Submission failed:", err);
+      alert("Something went wrong during submission.");
+    }
   }
-  
-  /* Wire “Finish Exam” button once DOM is ready */
-  document.addEventListener('DOMContentLoaded', ()=>{
-    const btn = document.getElementById('finishBtn');  // ensure your button has this id
-    if(btn) btn.addEventListener('click', finishExam);
+
+  // Attach once the DOM is ready
+  document.addEventListener("DOMContentLoaded", () => {
+    const finishBtn = document.getElementById("finishBtn");
+    if (finishBtn) finishBtn.addEventListener("click", finishExam);
   });
-  </script>
+</script>
+
+  
   </body>
   </html>
   <!-- ========== override / final handlers ========== -->
@@ -725,14 +788,106 @@ updateGrammarView();   // initialise
       window.mcqTotal = total;
     }
     
-    /* 3. Hook into finishExam()   (call gradeMCQ first) */
-    const originalFinish = window.finishExam;          // keep reference
-    window.finishExam = function(){
-      gradeMCQ();                                      // ← auto‑grade
-      /* optionally console.log(window.mcqScore, "of", window.mcqTotal); */
-      originalFinish();                                // continue normal flow
-    };
     </script>
-    
+    <script>
+
+      // Exam page: after Finish Exam
+     // ✅ REPLACEMENT: Final finishExam()
+  // Grade MCQs first
+  gradeMCQ();
+
+
+  const studentId = localStorage.getItem("studentId");
+if (!studentId) {
+  alert("Student ID missing. Please restart the exam.");
+  window.location.href = "index.html";
+}
+
+
+  const writingAnswer = document.querySelector("textarea").value;
+  let videoUrl = null;
+
+  // Upload video
+  if (videoBlob) {
+    const videoRef = storage.ref().child(`videos/${studentId}.webm`);
+    await videoRef.put(videoBlob);
+    videoUrl = await videoRef.getDownloadURL();
+  }
+
+  // Save to Firestore
+  await db.collection("students").doc(studentId).set({
+    mcqScore: window.mcqScore || 0,
+    writingAnswer,
+    videoUrl,
+    submittedAt: firebase.firestore.Timestamp.now()
+  }, { merge: true });
+
+  // Redirect
+  window.location.href = "end.html";
+
+
+
+  function startReading(){
+  show("reading-section");
+  startTimer();
+  enableExamLock(); // Add this line
+}
+if (!studentId) {
+  alert("Session expired. Please go back to the home page and start again.");
+  window.location.href = "index.html";
+  return;
+}
+async function finishExam() {
+  gradeMCQ(); // grade the MCQs
+  const writingAns = document.querySelector("textarea")?.value || '';
+  const studentId = localStorage.getItem("studentId");
+
+  if (!studentId) {
+    alert("Student ID not found. Please restart the test.");
+    window.location.href = "index.html";
+    return;
+  }
+
+  let videoUrl = null;
+
+  if (videoBlob) {
+    try {
+      const formData = new FormData();
+      formData.append("file", videoBlob);
+      formData.append("upload_preset", "exam_videos");
+      formData.append("cloud_name", "dihabha4b");
+
+      const res = await fetch("https://api.cloudinary.com/v1_1/dihabha4b/video/upload", {
+        method: "POST",
+        body: formData
+      });
+
+      const data = await res.json();
+      videoUrl = data.secure_url;
+    } catch (err) {
+      console.error("Video upload failed:", err);
+      alert("Video upload failed.");
+      return;
+    }
+  }
+
+  try {
+    await db.collection("students").doc(studentId).set({
+      mcqScore: window.mcqScore || 0,
+      writingAnswer: writingAns,
+      videoUrl,
+      submittedAt: firebase.firestore.Timestamp.now()
+    }, { merge: true });
+
+    alert("Exam submitted successfully!");
+    window.location.href = "end.html";
+  } catch (err) {
+    console.error("Exam submission failed:", err);
+    alert("Something went wrong during submission.");
+  }
+}
+console.log("studentId:", localStorage.getItem("studentId"));
+
+    </script>
 </body>
 </html>
