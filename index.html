@@ -209,6 +209,42 @@
       }
     };
   });
+
+  function validateOneTimeCode(inputCode, studentName, studentEmail) {
+  db.collection("oneTimeCodes").doc(inputCode).get()
+    .then((doc) => {
+      if (!doc.exists) {
+        alert("Invalid code.");
+        return;
+      }
+
+      const data = doc.data();
+      if (data.used) {
+        alert("This code has already been used.");
+        return;
+      }
+
+      // Mark code as used and store who used it
+      db.collection("oneTimeCodes").doc(inputCode).update({
+        used: true,
+        usedBy: {
+          name: studentName,
+          email: studentEmail,
+          usedAt: firebase.firestore.FieldValue.serverTimestamp()
+        }
+      });
+
+      // Proceed to exam page
+      sessionStorage.setItem("studentName", studentName);
+      sessionStorage.setItem("studentEmail", studentEmail);
+      sessionStorage.setItem("accessCode", inputCode);
+      window.location.href = "exam.html";
+    })
+    .catch((error) => {
+      console.error("Error validating code:", error);
+    });
+}
+
   </script>
   
 
