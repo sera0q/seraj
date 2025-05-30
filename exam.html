@@ -785,11 +785,8 @@ updateGrammarView();   // initialise
     }
     
     /* 3. Hook into finishExam()   (call gradeMCQ first) */
-    const originalFinish = window.finishExam;          // keep reference
-    window.finishExam = function(){
-      gradeMCQ();                                      // ← auto‑grade
-      /* optionally console.log(window.mcqScore, "of", window.mcqTotal); */
-      originalFinish();                                // continue normal flow
+   window.finishExam = finishExam;
+                               // continue normal flow
     };
     </script>
     <script>
@@ -891,6 +888,21 @@ async function finishExam() {
 }
 console.log("studentId:", localStorage.getItem("studentId"));
 
+<script>
+function finishExam() {
+  gradeMCQ();  // auto-grade
+
+  // Optional: Save writing answer
+  const writingAns = document.querySelector("#writing-section textarea")?.value || "";
+  window.writingAns = writingAns;
+
+  // Show confirmation and redirect
+  alert("Exam submitted successfully!");
+  window.location.href = "end.html"; // or your submission confirmation page
+}
+</script>
+
+      
     </script>
 </body>
 </html>
