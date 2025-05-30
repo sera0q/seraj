@@ -604,7 +604,7 @@ function redoRecording(){
 </script>
 <script>
 /* ===== GLOBAL TIMER ===== */
-let timer=null, timeRemaining=1*60;
+let timer=null, timeRemaining=50*60;
 function formatTime(s){return String(Math.floor(s/60)).padStart(2,"0")+":"+String(s%60).padStart(2,"0");}
 function startTimer(){ if(timer) return;
   timer=setInterval(()=>{timeRemaining--;document.getElementById("timer").textContent="⏳ "+formatTime(timeRemaining);
