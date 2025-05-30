@@ -208,6 +208,29 @@ async function finishExam() {
   }
 
   // Save to Firestore
+if (useProxy) {
+  // Use proxy for China users
+  try {
+    const res = await fetch("https://your-proxy.onrender.com/submit", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        studentId,
+        mcqScore: window.mcqScore || 0,
+        writingAnswer: writingAns,
+        videoUrl,
+        studentInfo
+      })
+    });
+    if (!res.ok) throw new Error("Proxy submit failed");
+    alert("Exam submitted via proxy!");
+    window.location.href = "end.html";
+  } catch (err) {
+    alert("Proxy submission failed.");
+    console.error(err);
+  }
+} else {
+  // Use Firebase for non-China
   await db.collection("students").doc(studentId).set({
     mcqScore: window.mcqScore || 0,
     writingAnswer: writingAns,
@@ -217,10 +240,18 @@ async function finishExam() {
 
   alert("Exam submitted successfully!");
   window.location.href = "end.html";
+
 }
 
 const studentId = localStorage.getItem("studentId");
 const studentInfo = JSON.parse(localStorage.getItem("currentStudent") || '{}');
 
+import { detectChina } from './detectCountry.js';
+
+let useProxy = false;
+
+window.addEventListener("DOMContentLoaded", async () => {
+  useProxy = await detectChina();
+});
 
 
